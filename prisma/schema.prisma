@@ -1,0 +1,163 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Better Auth required models
+model Account {
+  id            String  @id @default(uuid()) @db.Uuid
+  userId        String  @map("user_id") @db.Uuid
+  accountId     String  @map("account_id")
+  providerId    String  @map("provider_id")
+  accessToken   String? @map("access_token") @db.Text
+  refreshToken  String? @map("refresh_token") @db.Text
+  idToken       String? @map("id_token") @db.Text
+  expiresAt     DateTime? @map("expires_at")
+  password      String?
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+  @@map("account")
+}
+
+model Session {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  expiresAt DateTime @map("expires_at")
+  token     String   @unique
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session")
+}
+
+model Verification {
+  id         String   @id @default(uuid()) @db.Uuid
+  identifier String
+  value      String
+  expiresAt  DateTime @map("expires_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@unique([identifier, value])
+  @@map("verification")
+}
+
+// Core user model aligned with schema.sql and Better Auth
+model User {
+  id            String    @id @default(uuid()) @db.Uuid
+  name          String?
+  email         String    @unique
+  emailVerified Boolean   @default(false) @map("email_verified")
+  image         String?
+  accessCode    String?   @unique @map("access_code")
+  role          String    @default("user")
+  isActive      Boolean   @default(true) @map("is_active")
+  lastLogin     DateTime? @map("last_login")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  // Better Auth relationships
+  accounts      Account[]
+  sessions      Session[]
+
+  // File processing relationships
+  fileStorage   FileStorage[]
+  processingJobs ProcessingJob[]
+  fileAccessLog FileAccessLog[]
+
+  @@map("users")
+}
+
+// File storage metadata for Vercel Blob
+model FileStorage {
+  id                String    @id @default(uuid()) @db.Uuid
+  userId            String    @map("user_id") @db.Uuid
+  blobUrl           String    @map("blob_url")
+  blobPath          String    @map("blob_path")
+  fileName          String    @map("file_name")
+  fileSize          BigInt    @map("file_size")
+  mimeType          String    @map("mime_type")
+  fileHash          String?   @map("file_hash")
+  uploadSource      String    @default("web") @map("upload_source")
+  isPublic          Boolean   @default(false) @map("is_public")
+  accessExpiresAt   DateTime? @map("access_expires_at")
+  processingStatus  String    @default("uploaded") @map("processing_status")
+  processingJobId   String?   @unique @map("processing_job_id") @db.Uuid
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  processingJob ProcessingJob? @relation(fields: [processingJobId], references: [id])
+
+  @@map("file_storage")
+}
+
+// Processing jobs for async file processing
+model ProcessingJob {
+  id                String    @id @default(uuid()) @db.Uuid
+  userId            String    @map("user_id") @db.Uuid
+  fileStorageId     String?   @unique @map("file_storage_id") @db.Uuid
+  jobType           String    @map("job_type")
+  autoSave          Boolean   @default(true) @map("auto_save")
+  cleanup           Boolean   @default(true)
+  status            String    @default("pending")
+  progress          Int       @default(0)
+  currentStage      String?   @map("current_stage")
+  errorMessage      String?   @map("error_message")
+  resultData        Json?     @map("result_data")
+  confidenceScore   Decimal?  @map("confidence_score") @db.Decimal(3, 2)
+  createdAt         DateTime  @default(now()) @map("created_at")
+  startedAt         DateTime? @map("started_at")
+  completedAt       DateTime? @map("completed_at")
+  estimatedCompletion DateTime? @map("estimated_completion")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fileStorage FileStorage?
+
+  @@map("processing_jobs")
+}
+
+// File access audit log
+model FileAccessLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  fileName  String   @map("file_name")
+  action    String
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("file_access_log")
+}
+
+// Access codes for user invitations
+model AccessCode {
+  id          String    @id @default(uuid()) @db.Uuid
+  code        String    @unique @db.VarChar(12)
+  isUsed      Boolean   @default(false) @map("is_used")
+  usedByEmail String?   @db.VarChar(255) @map("used_by_email")
+  usedAt      DateTime? @map("used_at")
+  expiresAt   DateTime  @map("expires_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@index([code])
+  @@map("access_codes")
+}
