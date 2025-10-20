@@ -1,0 +1,124 @@
+"use client";
+
+/**
+ * Cloudflare Turnstile CAPTCHA Component
+ *
+ * Provides bot protection for sensitive forms:
+ * - Access code requests
+ * - Login forms (optional)
+ * - Password reset
+ *
+ * Environment Variables:
+ * - NEXT_PUBLIC_TURNSTILE_SITE_KEY: Public site key from Cloudflare
+ */
+
+import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
+import { useRef } from "react";
+
+interface TurnstileCaptchaProps {
+  onSuccess: (token: string) => void;
+  onError?: () => void;
+  onExpire?: () => void;
+  className?: string;
+}
+
+export function TurnstileCaptcha({
+  onSuccess,
+  onError,
+  onExpire,
+  className = "",
+}: TurnstileCaptchaProps) {
+  const turnstileRef = useRef<TurnstileInstance>(null);
+
+  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+
+  if (!siteKey) {
+    console.warn(
+      "NEXT_PUBLIC_TURNSTILE_SITE_KEY not set. CAPTCHA will not be rendered."
+    );
+    return (
+      <div className="rounded border border-yellow-500 bg-yellow-50 p-3 text-sm text-yellow-800 dark:bg-yellow-950 dark:text-yellow-200">
+        ⚠️ CAPTCHA not configured. Set NEXT_PUBLIC_TURNSTILE_SITE_KEY
+        environment variable.
+      </div>
+    );
+  }
+
+  return (
+    <div className={className}>
+      <Turnstile
+        ref={turnstileRef}
+        siteKey={siteKey}
+        onSuccess={onSuccess}
+        onError={() => {
+          console.error("Turnstile error");
+          onError?.();
+        }}
+        onExpire={() => {
+          console.log("Turnstile token expired");
+          onExpire?.();
+        }}
+        options={{
+          theme: "auto", // Automatically match system theme
+          size: "normal",
+          retry: "auto",
+        }}
+      />
+    </div>
+  );
+}
+
+/**
+ * Server-side CAPTCHA verification utility
+ */
+export async function verifyTurnstileToken(
+  token: string,
+  remoteIp?: string
+): Promise<{ success: boolean; error?: string }> {
+  const secretKey = process.env.TURNSTILE_SECRET_KEY;
+
+  if (!secretKey) {
+    console.error("TURNSTILE_SECRET_KEY not set");
+    // In development, we might want to skip verification
+    if (process.env.NODE_ENV === "development") {
+      console.warn("⚠️ Skipping CAPTCHA verification in development mode");
+      return { success: true };
+    }
+    return { success: false, error: "CAPTCHA configuration error" };
+  }
+
+  try {
+    const formData = new FormData();
+    formData.append("secret", secretKey);
+    formData.append("response", token);
+    if (remoteIp) {
+      formData.append("remoteip", remoteIp);
+    }
+
+    const response = await fetch(
+      "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    const data = await response.json();
+
+    if (!data.success) {
+      console.error("Turnstile verification failed:", data["error-codes"]);
+      return {
+        success: false,
+        error: "CAPTCHA verification failed",
+      };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("Turnstile verification error:", error);
+    return {
+      success: false,
+      error: "CAPTCHA verification error",
+    };
+  }
+}

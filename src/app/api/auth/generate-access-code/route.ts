@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import {
+  checkRateLimit,
+  getCodeGenerationLimiter,
+  formatRateLimitError,
+} from "@/lib/rate-limit";
 
 const prisma = new PrismaClient();
 
@@ -49,6 +54,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Check rate limit (50 codes per day per admin)
+    const limiter = getCodeGenerationLimiter();
+    const rateLimitResult = await checkRateLimit(limiter, session.user.id);
+
+    if (!rateLimitResult.allowed) {
+      return formatRateLimitError(rateLimitResult.retryAfter || 86400);
+    }
+
     // Generate a unique access code
     let accessCode = generateAccessCode();
     let existingCode = await prisma.accessCode.findUnique({
@@ -74,6 +87,8 @@ export async function POST(req: NextRequest) {
         code: accessCode,
         isUsed: false,
         expiresAt,
+        generatedBy: session.user.id,
+        generationType: "admin_invite",
       },
     });
 

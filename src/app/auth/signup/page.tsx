@@ -1,25 +1,87 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Shield, Eye, EyeOff } from "lucide-react";
+import { Shield, Eye, EyeOff, Check, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 
 export default function SignupPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [accessCode, setAccessCode] = useState("");
+  const [codeValidationStatus, setCodeValidationStatus] = useState<
+    "idle" | "validating" | "valid" | "invalid"
+  >("idle");
+  const [codeError, setCodeError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Load access code from URL query param if present
+  useEffect(() => {
+    const codeFromUrl = searchParams.get("code");
+    if (codeFromUrl) {
+      setAccessCode(codeFromUrl);
+      validateAccessCode(codeFromUrl);
+    }
+  }, [searchParams]);
+
+  const validateAccessCode = async (code: string) => {
+    if (!code || code.length !== 12) {
+      setCodeValidationStatus("invalid");
+      setCodeError("Access code must be 12 characters");
+      return;
+    }
+
+    setCodeValidationStatus("validating");
+    setCodeError("");
+
+    try {
+      const response = await fetch(
+        `/api/auth/validate-access-code?code=${code}`
+      );
+      const data = await response.json();
+
+      if (data.valid) {
+        setCodeValidationStatus("valid");
+        setCodeError("");
+      } else {
+        setCodeValidationStatus("invalid");
+        setCodeError(data.error || "Invalid access code");
+      }
+    } catch (error) {
+      console.error("Error validating access code:", error);
+      setCodeValidationStatus("invalid");
+      setCodeError("Failed to validate access code");
+    }
+  };
+
+  const handleAccessCodeChange = (value: string) => {
+    const upperValue = value.toUpperCase();
+    setAccessCode(upperValue);
+
+    if (upperValue.length === 12) {
+      validateAccessCode(upperValue);
+    } else {
+      setCodeValidationStatus("idle");
+      setCodeError("");
+    }
+  };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!email || !password || !name) {
+    if (!email || !password || !name || !accessCode) {
       toast.error("Please fill in all fields");
+      return;
+    }
+
+    if (codeValidationStatus !== "valid") {
+      toast.error("Please provide a valid access code");
       return;
     }
 
@@ -30,6 +92,19 @@ export default function SignupPage() {
 
     try {
       setIsSubmitting(true);
+
+      // Mark access code as used before creating the account
+      const useCodeResponse = await fetch("/api/auth/use-access-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: accessCode, email }),
+      });
+
+      if (!useCodeResponse.ok) {
+        const data = await useCodeResponse.json();
+        toast.error(data.error || "Failed to use access code");
+        return;
+      }
 
       await authClient.signUp.email({
         email,
@@ -69,6 +144,50 @@ export default function SignupPage() {
 
         <form onSubmit={handleSignup} className="mt-8 space-y-6">
           <div className="space-y-4">
+            <div>
+              <label
+                htmlFor="accessCode"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Access Code
+              </label>
+              <div className="mt-1 relative">
+                <input
+                  id="accessCode"
+                  type="text"
+                  value={accessCode}
+                  onChange={(e) => handleAccessCodeChange(e.target.value)}
+                  maxLength={12}
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 pr-10 uppercase font-mono tracking-wider"
+                  placeholder="XXXXXXXXXXXX"
+                  required
+                />
+                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                  {codeValidationStatus === "validating" && (
+                    <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />
+                  )}
+                  {codeValidationStatus === "valid" && (
+                    <Check className="h-5 w-5 text-green-500" />
+                  )}
+                  {codeValidationStatus === "invalid" && (
+                    <X className="h-5 w-5 text-red-500" />
+                  )}
+                </div>
+              </div>
+              {codeError && (
+                <p className="mt-1 text-sm text-red-600">{codeError}</p>
+              )}
+              <p className="mt-1 text-sm text-gray-500">
+                Don&apos;t have an access code?{" "}
+                <Link
+                  href="/auth/request-access"
+                  className="font-medium text-blue-600 hover:text-blue-500"
+                >
+                  Request one
+                </Link>
+              </p>
+            </div>
+
             <div>
               <label
                 htmlFor="name"
