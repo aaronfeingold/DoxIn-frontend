@@ -1,0 +1,107 @@
+%% Session Architecture for Multi-Server Deployment
+%% Stateless session management with Redis
+
+graph TB
+    subgraph Client["Client Browser"]
+        Browser[Web Browser]
+        Cookies[HTTP-only Cookies<br/>- Session Token<br/>- JWT optional]
+    end
+
+    subgraph LoadBalancer["Load Balancer / CDN"]
+        LB[Load Balancer<br/>Round-robin / Least-conn]
+    end
+
+    subgraph WebTier["Web Tier Stateless"]
+        Server1[Next.js Instance 1<br/>Port 3000]
+        Server2[Next.js Instance 2<br/>Port 3001]
+        Server3[Next.js Instance N<br/>Port 300N]
+    end
+
+    subgraph SessionLayer["Session Storage Layer"]
+        Redis[(Redis Container<br/>Shared Session Store)]
+        RedisConfig[Redis Config:<br/>- Host: localhost or remote<br/>- Port: 6379<br/>- Optional password]
+    end
+
+    subgraph DataLayer["Persistent Data Layer"]
+        Postgres[(PostgreSQL<br/>User Data, Access Codes,<br/>Access Requests)]
+        PrismaSchema[Prisma Schema:<br/>- User<br/>- Account<br/>- AccessCode<br/>- AccessRequest]
+    end
+
+    subgraph BetterAuth["Better Auth Configuration"]
+        AuthConfig[Better Auth Config<br/>- Database: Prisma adapter<br/>- Session: Redis adapter<br/>- JWT: 24hr expiry<br/>- Plugins: Magic Link]
+    end
+
+    %% Client to Load Balancer
+    Browser -->|HTTPS Request| LB
+    LB -->|Response + Set-Cookie| Browser
+    Browser -.->|Stores| Cookies
+
+    %% Load Balancer to Web Tier
+    LB -->|Route request| Server1
+    LB -->|Route request| Server2
+    LB -->|Route request| Server3
+
+    %% Web Tier to Session Layer
+    Server1 <-->|Get/Set Session<br/>ioredis client| Redis
+    Server2 <-->|Get/Set Session<br/>ioredis client| Redis
+    Server3 <-->|Get/Set Session<br/>ioredis client| Redis
+
+    %% Redis Configuration
+    Redis -.->|Configure via| RedisConfig
+
+    %% Web Tier to Data Layer
+    Server1 <-->|Prisma Client<br/>User CRUD| Postgres
+    Server2 <-->|Prisma Client<br/>User CRUD| Postgres
+    Server3 <-->|Prisma Client<br/>User CRUD| Postgres
+
+    %% Data Layer Schema
+    Postgres -.->|Defined by| PrismaSchema
+
+    %% Better Auth Integration
+    Server1 -.->|Uses| AuthConfig
+    Server2 -.->|Uses| AuthConfig
+    Server3 -.->|Uses| AuthConfig
+
+    AuthConfig -.->|Session store| Redis
+    AuthConfig -.->|User data| Postgres
+
+    %% Session Flow Details
+    subgraph SessionFlow["Session Lifecycle"]
+        Login[1. User Login] --> GenToken[2. Generate session token]
+        GenToken --> StoreRedis[3. Store in Redis<br/>Key: session:token<br/>Value: user data<br/>TTL: 7 days]
+        StoreRedis --> SetCookie[4. Set cookie on response]
+        SetCookie --> SubReq[5. Subsequent request<br/>with cookie]
+        SubReq --> ValidateToken[6. Validate token<br/>from Redis]
+        ValidateToken --> Authorized[7. Authorized request]
+    end
+
+    %% Scaling Benefits
+    subgraph Benefits["Scaling Benefits"]
+        B1[Horizontal Scaling:<br/>Add/remove servers<br/>based on load]
+        B2[Session Persistence:<br/>User session available<br/>on any server]
+        B3[Fast Session Access:<br/>Redis in-memory<br/>sub-ms latency]
+        B4[Automatic Expiry:<br/>Redis TTL handles<br/>session cleanup]
+    end
+
+    %% Environment Variables
+    subgraph EnvVars["Environment Variables"]
+        Env1[REDIS_URL or<br/>REDIS_HOST + REDIS_PORT]
+        Env2[DATABASE_URL<br/>PostgreSQL connection]
+        Env3[BETTER_AUTH_SECRET<br/>JWT signing key]
+        Env4[SESSION_EXPIRY<br/>7 days default]
+    end
+
+    Redis -.->|Configured by| Env1
+    Postgres -.->|Configured by| Env2
+    AuthConfig -.->|Uses| Env3
+    AuthConfig -.->|Uses| Env4
+
+    style Browser fill:#e1f5e1
+    style Redis fill:#ffe1e1
+    style Postgres fill:#e1e8ff
+    style Server1 fill:#fff4e1
+    style Server2 fill:#fff4e1
+    style Server3 fill:#fff4e1
+    style AuthConfig fill:#f0e6ff
+    style SessionFlow fill:#e8f4f8
+    style Benefits fill:#d4f4dd
