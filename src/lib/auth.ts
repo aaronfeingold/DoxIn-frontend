@@ -20,9 +20,10 @@ import { PrismaClient } from "@prisma/client";
 import { randomUUID } from "crypto";
 import { Resend } from "resend";
 import { getSessionRedisClient } from "./redis";
+import { serverConfig } from "@/config/server";
 
 const prisma = new PrismaClient();
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(serverConfig.resendApiKey);
 
 // Get Redis client for sessions (DB 2)
 const sessionRedis = getSessionRedisClient();
@@ -41,7 +42,7 @@ export const auth = betterAuth({
     autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url, token }) => {
       // This is used for magic link authentication
-      const magicLinkUrl = `${process.env.BETTER_AUTH_URL || "http://localhost:3000"}/api/auth/verify-email?token=${token}&callbackURL=/dashboard`;
+      const magicLinkUrl = `${serverConfig.betterAuthUrl}/api/auth/verify-email?token=${token}&callbackURL=/dashboard`;
 
       await resend.emails.send({
         from: "Invoice Platform <noreply@doxin.xyz>", // Update with your domain
@@ -177,7 +178,7 @@ export const auth = betterAuth({
   jwt: {
     expiresIn: 60 * 60 * 24, // 1 day
   },
-  secret: process.env.BETTER_AUTH_SECRET!,
+  secret: serverConfig.betterAuthSecret!,
 });
 
 /**

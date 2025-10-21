@@ -12,6 +12,7 @@ import {
   FileText,
 } from "lucide-react";
 import { toast } from "sonner";
+import { clientConfig } from "@/config/client";
 
 interface LineItem {
   line_number: number;
@@ -95,10 +96,8 @@ export default function InvoiceReviewModal({
 
     try {
       setLoading(true);
-      const backendUrl =
-        process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
       const response = await fetch(
-        `${backendUrl}/api/v1/jobs/my-jobs/${taskId}`,
+        `${clientConfig.backendUrl}/api/v1/jobs/my-jobs/${taskId}`,
         {
           credentials: "include",
         }
@@ -130,10 +129,8 @@ export default function InvoiceReviewModal({
 
     try {
       setSaving(true);
-      const backendUrl =
-        process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
       const response = await fetch(
-        `${backendUrl}/api/v1/invoices/approve/${taskId}`,
+        `${clientConfig.backendUrl}/api/v1/invoices/approve/${taskId}`,
         {
           method: "POST",
           credentials: "include",

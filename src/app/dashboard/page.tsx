@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Sparkles, Upload } from "lucide-react";
 import { useState, useEffect } from "react";
 import UploadInvoicesModal from "@/components/UploadInvoicesModal";
+import { clientConfig } from "@/config/client";
 
 interface DashboardStats {
   total_invoices: number;
@@ -21,7 +22,7 @@ export default function DashboardPage() {
     const fetchStats = async () => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/dashboard/stats`,
+          `${clientConfig.backendUrl}/api/v1/dashboard/stats`,
           {
             credentials: "include",
           }

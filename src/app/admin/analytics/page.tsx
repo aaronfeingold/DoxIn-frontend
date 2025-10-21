@@ -12,6 +12,7 @@ import { useState, useEffect } from "react";
 import AnalyticsSkeleton from "@/components/AnalyticsSkeleton";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { clientConfig } from "@/config/client";
 
 interface ExecutiveDashboard {
   financial_metrics: {
@@ -80,15 +81,15 @@ export default function AdminAnalyticsPage() {
 
         const [dashboardRes, customersRes, productsRes] = await Promise.all([
           fetch(
-            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/reports/analytics/executive-dashboard`,
+            `${clientConfig.backendUrl}/api/v1/reports/analytics/executive-dashboard`,
             { credentials: "include" }
           ),
           fetch(
-            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/reports/analytics/customer-analytics?limit=10`,
+            `${clientConfig.backendUrl}/api/v1/reports/analytics/customer-analytics?limit=10`,
             { credentials: "include" }
           ),
           fetch(
-            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/reports/analytics/product-performance?limit=10`,
+            `${clientConfig.backendUrl}/api/v1/reports/analytics/product-performance?limit=10`,
             { credentials: "include" }
           ),
         ]);

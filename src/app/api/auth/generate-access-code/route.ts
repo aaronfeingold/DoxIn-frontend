@@ -7,6 +7,7 @@ import {
   getCodeGenerationLimiter,
   formatRateLimitError,
 } from "@/lib/rate-limit";
+import { serverConfig } from "@/config/server";
 
 const prisma = new PrismaClient();
 
@@ -94,7 +95,7 @@ export async function POST(req: NextRequest) {
 
     // Get the base URL for the invitation link
     const baseUrl =
-      process.env.NEXT_PUBLIC_APP_URL || req.headers.get("origin") || "";
+      serverConfig.betterAuthUrl || req.headers.get("origin") || "";
     const invitationUrl = `${baseUrl}/auth/signup?access_code=${accessCode}`;
 
     console.log(

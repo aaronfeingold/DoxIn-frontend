@@ -19,6 +19,7 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import InvoiceEditModal from "@/components/InvoiceEditModal";
+import { clientConfig } from "@/config/client";
 
 interface Invoice {
   id: string;
@@ -96,10 +97,8 @@ export default function InvoicesPage() {
 
   const fetchAllUsers = async () => {
     try {
-      const backendUrl =
-        process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
       const response = await fetch(
-        `${backendUrl}/api/v1/admin/users?per_page=1000`,
+        `${clientConfig.backendUrl}/api/v1/admin/users?per_page=1000`,
         {
           credentials: "include",
         }
@@ -117,10 +116,8 @@ export default function InvoicesPage() {
   const fetchInvoices = async (page: number = 1) => {
     try {
       setIsLoading(true);
-      const backendUrl =
-        process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
-      const url = new URL(`${backendUrl}/api/v1/invoices/`);
+      const url = new URL(`${clientConfig.backendUrl}/api/v1/invoices/`);
       url.searchParams.append("page", page.toString());
       url.searchParams.append("per_page", pagination.per_page.toString());
 

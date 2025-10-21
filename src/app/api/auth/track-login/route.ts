@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import { serverConfig } from "@/config/server";
 
 export async function POST() {
   try {
@@ -11,8 +12,7 @@ export async function POST() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const flaskBaseUrl =
-      process.env.FLASK_API_URL || process.env.NEXT_PUBLIC_FLASK_API_URL;
+    const flaskBaseUrl = serverConfig.flaskApiUrl;
 
     if (!flaskBaseUrl) {
       console.error("FLASK_API_URL environment variable is not set");

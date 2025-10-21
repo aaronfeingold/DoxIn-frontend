@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { clientConfig } from "@/config/client";
 
 interface LineItem {
   id?: string;
@@ -108,10 +109,8 @@ export default function InvoiceEditModal({
   const fetchInvoice = async () => {
     try {
       setLoading(true);
-      const backendUrl =
-        process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
       const response = await fetch(
-        `${backendUrl}/api/v1/invoices/${invoiceId}`,
+        `${clientConfig.backendUrl}/api/v1/invoices/${invoiceId}`,
         {
           credentials: "include",
         }
@@ -148,10 +147,8 @@ export default function InvoiceEditModal({
 
     try {
       setSaving(true);
-      const backendUrl =
-        process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
       const response = await fetch(
-        `${backendUrl}/api/v1/invoices/${invoiceId}`,
+        `${clientConfig.backendUrl}/api/v1/invoices/${invoiceId}`,
         {
           method: "PUT",
           headers: {

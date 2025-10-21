@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { X, Download, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { clientConfig } from "@/config/client";
 
 interface GenerateReportModalProps {
   isOpen: boolean;
@@ -51,7 +52,7 @@ export default function GenerateReportModal({
   const checkReportStatus = async (reportId: string) => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/reports/${reportId}`,
+        `${clientConfig.backendUrl}/api/v1/reports/${reportId}`,
         {
           credentials: "include",
         }
@@ -78,9 +79,7 @@ export default function GenerateReportModal({
             clearInterval(pollingInterval);
             setPollingInterval(null);
           }
-          toast.error(
-            data.report.error_message || "Failed to generate report"
-          );
+          toast.error(data.report.error_message || "Failed to generate report");
         }
       }
     } catch (error) {
@@ -107,7 +106,7 @@ export default function GenerateReportModal({
       }
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/reports/generate`,
+        `${clientConfig.backendUrl}/api/v1/reports/generate`,
         {
           method: "POST",
           headers: {
@@ -156,7 +155,7 @@ export default function GenerateReportModal({
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/reports/${reportJob.report_id}/download`,
+        `${clientConfig.backendUrl}/api/v1/reports/${reportJob.report_id}/download`,
         {
           credentials: "include",
         }
@@ -312,10 +311,10 @@ export default function GenerateReportModal({
                     reportJob.status === "completed"
                       ? "bg-green-500/10 text-green-500"
                       : reportJob.status === "failed"
-                      ? "bg-red-500/10 text-red-500"
-                      : reportJob.status === "processing"
-                      ? "bg-blue-500/10 text-blue-500"
-                      : "bg-yellow-500/10 text-yellow-500"
+                        ? "bg-red-500/10 text-red-500"
+                        : reportJob.status === "processing"
+                          ? "bg-blue-500/10 text-blue-500"
+                          : "bg-yellow-500/10 text-yellow-500"
                   }`}
                 >
                   {reportJob.status.toUpperCase()}

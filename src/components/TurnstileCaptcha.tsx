@@ -14,6 +14,7 @@
 
 import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
 import { useRef } from "react";
+import { clientConfig } from "@/config/client";
 
 interface TurnstileCaptchaProps {
   onSuccess: (token: string) => void;
@@ -30,7 +31,7 @@ export function TurnstileCaptcha({
 }: TurnstileCaptchaProps) {
   const turnstileRef = useRef<TurnstileInstance>(null);
 
-  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+  const siteKey = clientConfig.turnstileSiteKey;
 
   if (!siteKey) {
     console.warn(
@@ -70,17 +71,20 @@ export function TurnstileCaptcha({
 
 /**
  * Server-side CAPTCHA verification utility
+ * NOTE: This function should be moved to a server-only file to avoid bundling server config in client bundle
  */
 export async function verifyTurnstileToken(
   token: string,
   remoteIp?: string
 ): Promise<{ success: boolean; error?: string }> {
-  const secretKey = process.env.TURNSTILE_SECRET_KEY;
+  // Import server config dynamically to avoid bundling it in client
+  const { serverConfig } = await import("@/config/server");
+  const secretKey = serverConfig.turnstileSecretKey;
 
   if (!secretKey) {
     console.error("TURNSTILE_SECRET_KEY not set");
     // In development, we might want to skip verification
-    if (process.env.NODE_ENV === "development") {
+    if (serverConfig.isDevelopment) {
       console.warn("⚠️ Skipping CAPTCHA verification in development mode");
       return { success: true };
     }

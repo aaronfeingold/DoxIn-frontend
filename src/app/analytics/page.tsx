@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import AnalyticsSkeleton from "@/components/AnalyticsSkeleton";
 import { toast } from "sonner";
+import { clientConfig } from "@/config/client";
 
 interface InvoiceStats {
   status_breakdown: {
@@ -70,7 +71,7 @@ export default function AnalyticsPage() {
 
         // Use the comprehensive summary endpoint
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/reports/analytics/summary`,
+          `${clientConfig.backendUrl}/api/v1/reports/analytics/summary`,
           { credentials: "include" }
         );
 

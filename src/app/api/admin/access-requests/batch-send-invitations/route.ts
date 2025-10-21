@@ -14,9 +14,10 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { Resend } from "resend";
 import crypto from "crypto";
+import { serverConfig } from "@/config/server";
 
 const prisma = new PrismaClient();
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(serverConfig.resendApiKey);
 
 /**
  * Generate a secure random access code
@@ -37,7 +38,7 @@ function generateAccessCode(): string {
  * Generate access code email HTML template
  */
 function getInvitationEmailHtml(name: string, accessCode: string): string {
-  const invitationUrl = `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/auth/signup?code=${accessCode}`;
+  const invitationUrl = `${serverConfig.betterAuthUrl}/auth/signup?code=${accessCode}`;
 
   return `
 <!DOCTYPE html>
