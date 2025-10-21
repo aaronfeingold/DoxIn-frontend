@@ -7,8 +7,7 @@
  * - Caching - DB 0
  * - WebSocket pub/sub - DB 0
  *
- * Redis supports multiple databases (0-15) within a single instance.
- * No need for multiple Redis containers!
+ * Note: Redis supports multiple databases (0-15) within a single instance.
  *
  * Environment Variables:
  * - REDIS_URL: Full Redis connection URL (redis://host:port)
