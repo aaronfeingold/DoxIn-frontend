@@ -19,9 +19,13 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { PrismaClient } from "@prisma/client";
 import { randomUUID } from "crypto";
 import { Resend } from "resend";
+import { getSessionRedisClient } from "./redis";
 
 const prisma = new PrismaClient();
 const resend = new Resend(process.env.RESEND_API_KEY);
+
+// Get Redis client for sessions (DB 2)
+const sessionRedis = getSessionRedisClient();
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -77,9 +81,38 @@ export const auth = betterAuth({
     },
   },
   plugins: [],
+
+  // Use Redis for session storage (Better Auth official approach)
+  // See: https://www.better-auth.com/docs/concepts/database#secondary-storage
+  secondaryStorage: {
+    get: async (key) => {
+      console.log("[Better Auth Redis] GET key:", key);
+      const value = await sessionRedis.get(key);
+      console.log(
+        "[Better Auth Redis] GET result:",
+        value ? "FOUND" : "NOT FOUND"
+      );
+      return value;
+    },
+    set: async (key, value, ttl) => {
+      console.log("[Better Auth Redis] SET key:", key, "TTL:", ttl, "seconds");
+      // ioredis syntax - TTL is in seconds
+      if (ttl) {
+        await sessionRedis.set(key, value, "EX", ttl);
+      } else {
+        await sessionRedis.set(key, value);
+      }
+    },
+    delete: async (key) => {
+      console.log("[Better Auth Redis] DELETE key:", key);
+      await sessionRedis.del(key);
+    },
+  },
+
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days
     updateAge: 60 * 60 * 24, // 1 day
+    cookieName: "better-auth.session",
   },
   jwt: {
     expiresIn: 60 * 60 * 24, // 1 day
