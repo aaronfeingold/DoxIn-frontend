@@ -9,8 +9,12 @@ GOOGLE_CLIENT_SECRET=your-google-client-secret
 # Resend Email Service
 RESEND_API_KEY=your-resend-api-key
 
-# Database Configuration
-DATABASE_URL=postgresql://case-study:password@localhost:5433/case-study
+# Auth Database Configuration (separate from app database)
+DATABASE_URL=postgresql://auth_user:password@localhost:5434/doxin_auth
+
+# Redis Configuration (for sessions)
+REDIS_URL=redis://localhost:6379
+REDIS_SESSION_DB=2
 
 # Flask API Configuration
 NEXT_PUBLIC_FLASK_API_URL=http://localhost:5000
