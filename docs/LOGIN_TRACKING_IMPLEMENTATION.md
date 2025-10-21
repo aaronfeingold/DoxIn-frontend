@@ -12,16 +12,16 @@ Successfully implemented comprehensive login tracking across the entire applicat
 
 **File**: `new-frontend/case-study/src/app/api/auth/track-login/route.ts`
 
-- Creates a dedicated endpoint to update the `lastLogin` timestamp
-- Validates user session before updating
-- Updates the Prisma database with current timestamp
+- Validates the Better Auth session server-side
+- Proxies the request to the Flask API's `/api/v1/auth/track-login`
+- Ensures the backend audit log and usage analytics are recorded from browser context
 
 #### Updated Sign-In Flow
 
 **File**: `new-frontend/case-study/src/app/auth/signin/page.tsx`
 
 - Added automatic login tracking after successful sign-in
-- Calls `/api/auth/track-login` endpoint after authentication
+- Calls `/api/auth/track-login` endpoint, which forwards to the Flask API
 - Non-blocking to avoid delaying user navigation
 
 #### Updated Sign-Up Flow
@@ -29,7 +29,7 @@ Successfully implemented comprehensive login tracking across the entire applicat
 **File**: `new-frontend/case-study/src/app/auth/signup/page.tsx`
 
 - Tracks initial login event when users create new accounts
-- Ensures first login is recorded in the database
+- Ensures first login is recorded centrally through the Flask API
 
 ### 2. Backend Login Tracking (Python Flask)
 
