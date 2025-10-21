@@ -9,10 +9,10 @@ GOOGLE_CLIENT_SECRET=your-google-client-secret
 # Resend Email Service
 RESEND_API_KEY=your-resend-api-key
 
-# Auth Database Configuration (separate from app database)
-DATABASE_URL=postgresql://auth_user:password@localhost:5434/doxin_auth
+# Database Configuration
+DATABASE_URL=postgresql://doxin:password@localhost:5434/doxin
 
-# Redis Configuration (for sessions)
+# Redis Configuration (sessions in DB 2)
 REDIS_URL=redis://localhost:6379
 REDIS_SESSION_DB=2
 

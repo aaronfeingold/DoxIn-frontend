@@ -9,6 +9,7 @@ import React, {
 } from "react";
 import { useSession } from "@/lib/auth-client";
 import type { User } from "@prisma/client";
+import { fetchJwtToken } from "@/lib/jwt";
 
 interface AuthContextType {
   user: User | null;
@@ -16,6 +17,11 @@ interface AuthContextType {
   isAuthenticated: boolean;
   error: string | null;
   refreshUser: () => Promise<void>;
+  jwtToken: string | null;
+  jwtExpiresAt: string | null;
+  isJwtLoading: boolean;
+  jwtError: string | null;
+  refreshJwtToken: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -29,12 +35,19 @@ export function AuthContextProvider({
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [jwtToken, setJwtToken] = useState<string | null>(null);
+  const [jwtExpiresAt, setJwtExpiresAt] = useState<string | null>(null);
+  const [isJwtLoading, setIsJwtLoading] = useState(false);
+  const [jwtError, setJwtError] = useState<string | null>(null);
 
   const loadUser = useCallback(
     async (showLoading = true) => {
       if (!session?.user) {
         setUser(null);
         setIsLoading(false);
+        setJwtToken(null);
+        setJwtExpiresAt(null);
+        setJwtError(null);
         return;
       }
 
@@ -60,8 +73,39 @@ export function AuthContextProvider({
     [session?.user]
   );
 
+  const loadJwtToken = useCallback(async () => {
+    if (!session?.user) {
+      setJwtToken(null);
+      setJwtExpiresAt(null);
+      setJwtError(null);
+      return;
+    }
+
+    setIsJwtLoading(true);
+    setJwtError(null);
+
+    try {
+      const { token, expires_at } = await fetchJwtToken();
+      setJwtToken(token);
+      setJwtExpiresAt(expires_at);
+    } catch (err) {
+      console.error("Failed to fetch JWT token:", err);
+      setJwtToken(null);
+      setJwtExpiresAt(null);
+      setJwtError(
+        err instanceof Error ? err.message : "Failed to fetch JWT token"
+      );
+    } finally {
+      setIsJwtLoading(false);
+    }
+  }, [session?.user]);
+
   const refreshUser = async () => {
     await loadUser(false);
+  };
+
+  const refreshJwtToken = async () => {
+    await loadJwtToken();
   };
 
   useEffect(() => {
@@ -72,18 +116,27 @@ export function AuthContextProvider({
 
     if (session?.user) {
       loadUser(true);
+      loadJwtToken();
     } else {
       setUser(null);
       setIsLoading(false);
+      setJwtToken(null);
+      setJwtExpiresAt(null);
+      setJwtError(null);
     }
-  }, [session?.user, isPending, loadUser]);
+  }, [session?.user, isPending, loadUser, loadJwtToken]);
 
   const value: AuthContextType = {
     user,
-    isLoading: isLoading || isPending,
+    isLoading: isLoading || isPending || isJwtLoading,
     isAuthenticated: !!session?.user,
     error,
     refreshUser,
+    jwtToken,
+    jwtExpiresAt,
+    isJwtLoading,
+    jwtError,
+    refreshJwtToken,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
