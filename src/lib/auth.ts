@@ -44,7 +44,7 @@ export const auth = betterAuth({
       const magicLinkUrl = `${process.env.BETTER_AUTH_URL || "http://localhost:3000"}/api/auth/verify-email?token=${token}&callbackURL=/dashboard`;
 
       await resend.emails.send({
-        from: "Invoice Platform <noreply@yourdomain.com>", // Update with your domain
+        from: "Invoice Platform <noreply@doxin.xyz>", // Update with your domain
         to: user.email,
         subject: "Sign in to your account",
         html: getMagicLinkEmailHtml(user.name || "User", magicLinkUrl),
