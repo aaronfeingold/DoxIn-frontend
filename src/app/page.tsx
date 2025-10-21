@@ -60,7 +60,7 @@ export default function Page() {
             className="text-center max-w-4xl mx-auto"
           >
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-balance mb-8">
-              Transform invoices into structured data
+              Turn piles of receipts into personal spending insights
             </h1>
             <p className="text-xl sm:text-2xl text-muted-foreground text-balance mb-12 leading-relaxed">
               AI-powered extraction that saves hours of manual work. Process
