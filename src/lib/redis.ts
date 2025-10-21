@@ -60,7 +60,7 @@ export function getRedisClient(db: number = 0): Redis {
     const host = process.env.REDIS_HOST || "localhost";
     const port = parseInt(process.env.REDIS_PORT || "6379", 10);
     const password = process.env.REDIS_PASSWORD;
-    // Note: REDIS_HOST, REDIS_PORT, and REDIS_PASSWORD are kept as direct env vars
+    // Note: REDIS_HOST, REDIS_PORT, and REDIS_PASSWORD are kept as direct env vars instead of an abstraction
     // since they're only used when REDIS_URL is not available
 
     redis = new Redis({
