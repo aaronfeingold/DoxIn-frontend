@@ -96,6 +96,66 @@ export const auth = betterAuth({
     },
     set: async (key, value, ttl) => {
       console.log("[Better Auth Redis] SET key:", key, "TTL:", ttl, "seconds");
+
+      // Enrich session data with full user information for Flask backend
+      // Parse the value to check if it's a session and enrich it
+      try {
+        const sessionData = JSON.parse(value);
+
+        // If this is a session object (has userId), enrich it with full user data
+        if (sessionData && sessionData.userId) {
+          const user = await prisma.user.findUnique({
+            where: { id: sessionData.userId },
+            select: {
+              id: true,
+              email: true,
+              name: true,
+              role: true,
+              isActive: true,
+              emailVerified: true,
+              image: true,
+              createdAt: true,
+              updatedAt: true,
+            },
+          });
+
+          if (user) {
+            // Add full user object to session data for Flask backend consumption
+            sessionData.user = {
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              role: user.role,
+              isActive: user.isActive,
+              emailVerified: user.emailVerified,
+              image: user.image,
+              createdAt: user.createdAt?.toISOString(),
+              updatedAt: user.updatedAt?.toISOString(),
+            };
+
+            // Also add top-level fields for backwards compatibility
+            sessionData.userEmail = user.email;
+            sessionData.userRole = user.role;
+
+            console.log(
+              "[Better Auth Redis] Enriched session with user data:",
+              {
+                userId: user.id,
+                email: user.email,
+                role: user.role,
+              }
+            );
+
+            value = JSON.stringify(sessionData);
+          }
+        }
+      } catch (err) {
+        // If parsing fails or it's not a session, just store as-is
+        console.log(
+          "[Better Auth Redis] Not a session object or parse error, storing as-is"
+        );
+      }
+
       // ioredis syntax - TTL is in seconds
       if (ttl) {
         await sessionRedis.set(key, value, "EX", ttl);
