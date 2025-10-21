@@ -89,7 +89,7 @@ export async function verifyTurnstileToken(
     console.error("TURNSTILE_SECRET_KEY not set");
     // In development, we might want to skip verification
     if (serverConfig.isDevelopment) {
-      console.warn("⚠️ Skipping CAPTCHA verification in development mode");
+      console.warn("Skipping CAPTCHA verification in development mode");
       return { success: true };
     }
     return { success: false, error: "CAPTCHA configuration error" };
