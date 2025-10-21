@@ -1,0 +1,109 @@
+%% Complete Authentication System Overview
+%% Shows all authentication methods and access control
+
+graph TD
+    Start([User]) --> Choice{Action?}
+
+    %% SIGNUP FLOW
+    Choice -->|Sign Up| HasCode{Has access<br/>code?}
+    HasCode -->|No| RequestAccess[Request Access Page]
+    RequestAccess --> CAPTCHA[Cloudflare Turnstile]
+    CAPTCHA --> SubmitReq[Submit request<br/>Rate limited: 3/24hrs]
+    SubmitReq --> AdminApproval[Admin reviews & approves]
+    AdminApproval --> GetCode[Receive code via email]
+
+    HasCode -->|Yes| SignupPage[Signup Page]
+    GetCode --> SignupPage
+
+    SignupPage --> ValidateCode[Validate access code]
+    ValidateCode --> CodeOK{Valid?}
+    CodeOK -->|No| SignupError[Error: Invalid/expired/used]
+    SignupError --> RequestAccess
+
+    CodeOK -->|Yes| EnterDetails[Enter:<br/>- Name<br/>- Email<br/>- Password]
+    EnterDetails --> CreateAcct[Create Account]
+    CreateAcct --> UseCode[Mark code as used]
+    UseCode --> Dashboard
+
+    %% SIGNIN FLOWS
+    Choice -->|Sign In| SigninPage[Sign In Page]
+    SigninPage --> Method{Auth Method?}
+
+    %% Email/Password
+    Method -->|Email/Password| EnterCreds[Enter email & password]
+    EnterCreds --> VerifyCreds{Valid?}
+    VerifyCreds -->|No| CredsError[Error: Invalid credentials]
+    CredsError --> SigninPage
+    VerifyCreds -->|Yes| CreateSession1[Create session]
+    CreateSession1 --> Dashboard
+
+    %% Magic Link
+    Method -->|Magic Link| EnterEmail[Enter email address]
+    EnterEmail --> MagicRateLimit{Rate limit<br/>3/15min}
+    MagicRateLimit -->|Exceeded| MagicError[Error: Too many attempts]
+    MagicError --> SigninPage
+    MagicRateLimit -->|OK| SendMagic[Send magic link email]
+    SendMagic --> WaitClick[User clicks link in email]
+    WaitClick --> VerifyToken{Token valid<br/>& not expired?}
+    VerifyToken -->|No| TokenError[Error: Invalid/expired link]
+    TokenError --> SigninPage
+    VerifyToken -->|Yes| CreateSession2[Create session]
+    CreateSession2 --> Dashboard
+
+    %% Google OAuth
+    Method -->|Google OAuth| GoogleAuth[Redirect to Google]
+    GoogleAuth --> GoogleApprove{User approves?}
+    GoogleApprove -->|No| OAuthCancel[User cancels]
+    OAuthCancel --> SigninPage
+    GoogleApprove -->|Yes| GoogleCallback[OAuth callback]
+    GoogleCallback --> CreateOrLink[Create/link account]
+    CreateOrLink --> CreateSession3[Create session]
+    CreateSession3 --> Dashboard
+
+    %% SESSION MANAGEMENT
+    Dashboard([Dashboard]) --> SessionStore[Session Storage]
+    SessionStore --> Redis[(Redis<br/>Shared Session Store)]
+    Redis --> MultiServer[Available to all<br/>Next.js instances]
+
+    %% ADMIN FUNCTIONS
+    Choice -->|Admin Tasks| AdminAuth{Is admin?}
+    AdminAuth -->|No| Forbidden[403 Forbidden]
+    AdminAuth -->|Yes| AdminDash[Admin Dashboard]
+
+    AdminDash --> AdminAction{Action?}
+    AdminAction -->|View Requests| ListRequests[Access Requests List<br/>Filter, search, paginate]
+    AdminAction -->|Approve Request| ApproveReq[Approve request]
+    AdminAction -->|Reject Request| RejectReq[Reject with reason]
+    AdminAction -->|Generate Code| GenCode[Generate code<br/>Rate limited: 50/day]
+    AdminAction -->|Batch Send| BatchSend[Select multiple approved<br/>Generate codes<br/>Send emails]
+    AdminAction -->|View Codes| CodeList[Access Codes Management<br/>View all codes & usage]
+
+    ListRequests --> AdminDash
+    ApproveReq --> AdminDash
+    RejectReq --> AdminDash
+    GenCode --> AdminDash
+    BatchSend --> AdminDash
+    CodeList --> AdminDash
+
+    %% SECURITY LAYERS
+    CAPTCHA -.->|Bot protection| Security[Security Layers]
+    SubmitReq -.->|Rate limiting| Security
+    MagicRateLimit -.->|Rate limiting| Security
+    GenCode -.->|Rate limiting| Security
+    Redis -.->|Session sharing| Security
+
+    style Start fill:#e1f5e1
+    style Dashboard fill:#e1f5e1
+    style AdminDash fill:#fff4e1
+    style SignupError fill:#ffcccc
+    style CredsError fill:#ffcccc
+    style MagicError fill:#ffcccc
+    style TokenError fill:#ffcccc
+    style Forbidden fill:#ffcccc
+    style Redis fill:#e1e8ff
+    style Security fill:#ffe1e1
+    style CAPTCHA fill:#fff4e1
+    style CreateAcct fill:#d4f4dd
+    style CreateSession1 fill:#d4f4dd
+    style CreateSession2 fill:#d4f4dd
+    style CreateSession3 fill:#d4f4dd

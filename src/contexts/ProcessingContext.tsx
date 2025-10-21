@@ -10,6 +10,7 @@ import React, {
 } from "react";
 import { io, Socket } from "socket.io-client";
 import { toast } from "sonner";
+import { clientConfig } from "@/config/client";
 
 interface ProcessingOptions {
   auto_save?: boolean;
@@ -54,10 +55,7 @@ export function ProcessingProvider({
 
   // Initialize websocket connection
   useEffect(() => {
-    const backendUrl =
-      process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
-
-    const socket = io(backendUrl, {
+    const socket = io(clientConfig.backendUrl, {
       transports: ["polling", "websocket"], // Try polling first, then upgrade
       reconnection: true,
       reconnectionAttempts: 5,
@@ -209,10 +207,8 @@ export function ProcessingProvider({
         const uploadedFiles = await Promise.all(uploadPromises);
 
         // Send batch processing request to backend
-        const backendUrl =
-          process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
         const response = await fetch(
-          `${backendUrl}/api/v1/invoices/process-batch`,
+          `${clientConfig.backendUrl}/api/v1/invoices/process-batch`,
           {
             method: "POST",
             headers: {
@@ -271,11 +267,12 @@ export function ProcessingProvider({
 
   const cancelJob = useCallback(async (taskId: string) => {
     try {
-      const backendUrl =
-        process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
-      const response = await fetch(`${backendUrl}/api/jobs/${taskId}/cancel`, {
-        method: "POST",
-      });
+      const response = await fetch(
+        `${clientConfig.backendUrl}/api/jobs/${taskId}/cancel`,
+        {
+          method: "POST",
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to cancel job");

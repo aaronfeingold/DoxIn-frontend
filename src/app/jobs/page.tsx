@@ -18,6 +18,7 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import InvoiceReviewModal from "@/components/InvoiceReviewModal";
+import { clientConfig } from "@/config/client";
 
 interface Job {
   id: string;
@@ -137,10 +138,8 @@ export default function JobsPage() {
   const fetchJobs = async () => {
     try {
       setIsLoading(true);
-      const backendUrl =
-        process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
-      const url = new URL(`${backendUrl}/api/v1/jobs/my-jobs`);
+      const url = new URL(`${clientConfig.backendUrl}/api/v1/jobs/my-jobs`);
       if (statusFilter !== "all") {
         url.searchParams.append("status", statusFilter);
       }
@@ -187,10 +186,8 @@ export default function JobsPage() {
   const handleJobClick = async (job: Job) => {
     if (job.status === "completed" || job.status === "failed") {
       try {
-        const backendUrl =
-          process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
         const response = await fetch(
-          `${backendUrl}/api/v1/jobs/my-jobs/${job.id}`,
+          `${clientConfig.backendUrl}/api/v1/jobs/my-jobs/${job.id}`,
           {
             credentials: "include",
           }

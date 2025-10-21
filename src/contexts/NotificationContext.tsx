@@ -12,6 +12,7 @@ import { useProcessing } from "./ProcessingContext";
 import { useAuth } from "./AuthContext";
 import { toast } from "sonner";
 import { io, Socket } from "socket.io-client";
+import { clientConfig } from "@/config/client";
 
 interface NotificationContextType {
   unreadCount: number;
@@ -37,10 +38,8 @@ export function NotificationProvider({
 
   const refreshUnreadCount = useCallback(async () => {
     try {
-      const backendUrl =
-        process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
       const response = await fetch(
-        `${backendUrl}/api/v1/jobs/my-jobs/unread-count`,
+        `${clientConfig.backendUrl}/api/v1/jobs/my-jobs/unread-count`,
         {
           credentials: "include",
         }
@@ -60,10 +59,8 @@ export function NotificationProvider({
 
   const markAllAsRead = useCallback(async () => {
     try {
-      const backendUrl =
-        process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
       const response = await fetch(
-        `${backendUrl}/api/v1/jobs/my-jobs/mark-as-read`,
+        `${clientConfig.backendUrl}/api/v1/jobs/my-jobs/mark-as-read`,
         {
           method: "POST",
           credentials: "include",
@@ -101,10 +98,8 @@ export function NotificationProvider({
   const markJobAsRead = useCallback(
     async (jobId: string) => {
       try {
-        const backendUrl =
-          process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
         const response = await fetch(
-          `${backendUrl}/api/v1/jobs/my-jobs/mark-as-read`,
+          `${clientConfig.backendUrl}/api/v1/jobs/my-jobs/mark-as-read`,
           {
             method: "POST",
             credentials: "include",
@@ -136,10 +131,7 @@ export function NotificationProvider({
   useEffect(() => {
     if (!user?.id) return;
 
-    const backendUrl =
-      process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
-
-    const socket = io(backendUrl, {
+    const socket = io(clientConfig.backendUrl, {
       transports: ["polling", "websocket"],
       reconnection: true,
     });

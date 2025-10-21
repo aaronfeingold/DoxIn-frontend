@@ -1,0 +1,71 @@
+%% User Request Access Flow
+%% This diagram shows the complete user-initiated access request workflow
+
+graph TD
+    Start([User wants to sign up]) --> HasCode{Has access code?}
+
+    HasCode -->|Yes| GoSignup[Go to Signup Page]
+    HasCode -->|No| RequestPage[Visit Request Access Page]
+
+    RequestPage --> FillForm[Fill Request Form<br/>- Email<br/>- Name<br/>- Message optional]
+    FillForm --> Captcha[Complete Turnstile CAPTCHA]
+    Captcha --> Submit[Submit Request]
+
+    Submit --> RateLimit{Rate limit check<br/>3/24hrs per email}
+    RateLimit -->|Exceeded| RateLimitError[Error: Too many requests]
+    RateLimitError --> End1([User must wait])
+
+    RateLimit -->|OK| DuplicateCheck{Existing pending<br/>request?}
+    DuplicateCheck -->|Yes| DuplicateError[Error: Pending request exists]
+    DuplicateError --> End2([User must wait for review])
+
+    DuplicateCheck -->|No| AccountCheck{Account<br/>exists?}
+    AccountCheck -->|Yes| AccountError[Error: Account exists]
+    AccountError --> End3([User should sign in])
+
+    AccountCheck -->|No| CreateRequest[Create Access Request<br/>Status: pending]
+    CreateRequest --> NotifyAdmin[TODO: Notify admins]
+    NotifyAdmin --> SuccessMsg[Success: Request submitted]
+    SuccessMsg --> WaitReview[User waits for admin review]
+
+    WaitReview --> AdminReview{Admin reviews}
+    AdminReview -->|Rejected| SendRejection[Send rejection email<br/>with reason]
+    SendRejection --> End4([User request denied])
+
+    AdminReview -->|Approved| MarkApproved[Update request<br/>Status: approved]
+    MarkApproved --> AdminBatch{Admin batch<br/>send workflow}
+    AdminBatch --> GenCode[Generate 12-char code<br/>Expires in 24hrs]
+    GenCode --> SendEmail[Send invitation email<br/>with access code]
+    SendEmail --> UserReceives[User receives email]
+    UserReceives --> GoSignup
+
+    GoSignup --> SignupPage[Signup Page]
+    SignupPage --> EnterCode[Enter access code<br/>from email or URL param]
+    EnterCode --> ValidateCode[Real-time validation]
+    ValidateCode --> CodeValid{Code valid?}
+
+    CodeValid -->|No| CodeError[Show error:<br/>Invalid, expired, or used]
+    CodeError --> EnterCode
+
+    CodeValid -->|Yes| ShowCheck[Show green checkmark]
+    ShowCheck --> FillSignup[Fill signup form<br/>- Name<br/>- Email<br/>- Password]
+    FillSignup --> SubmitSignup[Submit signup]
+    SubmitSignup --> MarkUsed[Mark code as used]
+    MarkUsed --> CreateAccount[Create user account]
+    CreateAccount --> SignIn[Auto sign in]
+    SignIn --> Dashboard([Redirect to Dashboard])
+
+    style Start fill:#e1f5e1
+    style Dashboard fill:#e1f5e1
+    style End1 fill:#ffe1e1
+    style End2 fill:#ffe1e1
+    style End3 fill:#ffe1e1
+    style End4 fill:#ffe1e1
+    style RateLimitError fill:#ffcccc
+    style DuplicateError fill:#ffcccc
+    style AccountError fill:#ffcccc
+    style CodeError fill:#ffcccc
+    style CreateRequest fill:#e1e8ff
+    style GenCode fill:#fff4e1
+    style SendEmail fill:#fff4e1
+    style CreateAccount fill:#e1f5e1

@@ -80,6 +80,10 @@ model User {
   processingJobs ProcessingJob[]
   fileAccessLog FileAccessLog[]
 
+  // Access code relationships
+  generatedAccessCodes AccessCode[]     @relation("GeneratedAccessCodes")
+  reviewedRequests     AccessRequest[]  @relation("ReviewedAccessRequests")
+
   @@map("users")
 }
 
@@ -149,15 +153,45 @@ model FileAccessLog {
 
 // Access codes for user invitations
 model AccessCode {
-  id          String    @id @default(uuid()) @db.Uuid
-  code        String    @unique @db.VarChar(12)
-  isUsed      Boolean   @default(false) @map("is_used")
-  usedByEmail String?   @db.VarChar(255) @map("used_by_email")
-  usedAt      DateTime? @map("used_at")
-  expiresAt   DateTime  @map("expires_at")
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
+  id               String    @id @default(uuid()) @db.Uuid
+  code             String    @unique @db.VarChar(12)
+  isUsed           Boolean   @default(false) @map("is_used")
+  usedByEmail      String?   @db.VarChar(255) @map("used_by_email")
+  usedAt           DateTime? @map("used_at")
+  expiresAt        DateTime  @map("expires_at")
+  generatedBy      String?   @map("generated_by") @db.Uuid
+  generationType   String    @default("admin_invite") @map("generation_type") // admin_invite or user_request
+  accessRequestId  String?   @unique @map("access_request_id") @db.Uuid
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  generatedByUser User?          @relation("GeneratedAccessCodes", fields: [generatedBy], references: [id], onDelete: SetNull)
+  accessRequest   AccessRequest? @relation(fields: [accessRequestId], references: [id], onDelete: SetNull)
 
   @@index([code])
+  @@index([generatedBy])
+  @@index([accessRequestId])
   @@map("access_codes")
+}
+
+// User-initiated access requests
+model AccessRequest {
+  id              String    @id @default(uuid()) @db.Uuid
+  email           String    @db.VarChar(255)
+  name            String    @db.VarChar(255)
+  message         String?   @db.Text
+  status          String    @default("pending") // pending, approved, rejected
+  requestedAt     DateTime  @default(now()) @map("requested_at")
+  reviewedAt      DateTime? @map("reviewed_at")
+  reviewedBy      String?   @map("reviewed_by") @db.Uuid
+  rejectionReason String?   @map("rejection_reason") @db.Text
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  reviewer   User?        @relation("ReviewedAccessRequests", fields: [reviewedBy], references: [id], onDelete: SetNull)
+  accessCode AccessCode?
+
+  @@index([status, createdAt])
+  @@index([email])
+  @@map("access_requests")
 }

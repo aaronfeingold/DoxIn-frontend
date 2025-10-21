@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import {
+  checkRateLimit,
+  getCodeGenerationLimiter,
+  formatRateLimitError,
+} from "@/lib/rate-limit";
+import { serverConfig } from "@/config/server";
 
 const prisma = new PrismaClient();
 
@@ -49,6 +55,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Check rate limit (50 codes per day per admin)
+    const limiter = getCodeGenerationLimiter();
+    const rateLimitResult = await checkRateLimit(limiter, session.user.id);
+
+    if (!rateLimitResult.allowed) {
+      return formatRateLimitError(rateLimitResult.retryAfter || 86400);
+    }
+
     // Generate a unique access code
     let accessCode = generateAccessCode();
     let existingCode = await prisma.accessCode.findUnique({
@@ -74,12 +88,14 @@ export async function POST(req: NextRequest) {
         code: accessCode,
         isUsed: false,
         expiresAt,
+        generatedBy: session.user.id,
+        generationType: "admin_invite",
       },
     });
 
     // Get the base URL for the invitation link
     const baseUrl =
-      process.env.NEXT_PUBLIC_APP_URL || req.headers.get("origin") || "";
+      serverConfig.betterAuthUrl || req.headers.get("origin") || "";
     const invitationUrl = `${baseUrl}/auth/signup?access_code=${accessCode}`;
 
     console.log(
