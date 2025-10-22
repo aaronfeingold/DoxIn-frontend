@@ -10,7 +10,6 @@ import {
   CheckCircle2,
   XCircle,
   Loader2,
-  FileText,
   ChevronRight,
   BellOff,
   ChevronLeft,
@@ -27,7 +26,7 @@ interface Job {
   progress: number;
   current_stage?: string;
   error_message?: string;
-  result_data?: any;
+  result_data?: Record<string, unknown>;
   created_at: string;
   started_at?: string;
   completed_at?: string;
