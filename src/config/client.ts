@@ -14,19 +14,11 @@
  * - API routes
  * - Anywhere in the app
  */
-
 /**
- * Flask/Python Backend API URL (client-accessible)
+ * API URL
  */
-export const flaskApiUrl = process.env.NEXT_PUBLIC_FLASK_API_URL;
-
-/**
- * Backend URL for WebSocket connections
- */
-export const backendUrl =
-  process.env.NEXT_PUBLIC_BACKEND_URL ||
-  process.env.NEXT_PUBLIC_FLASK_API_URL ||
-  "http://localhost:5000";
+export const apiUrl =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 /**
  * Cloudflare Turnstile Site Key (CAPTCHA)
@@ -38,7 +30,7 @@ export const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
  * Use this for convenient access to all client-side config
  */
 export const clientConfig = {
-  apiUrl: backendUrl,
+  apiUrl,
   turnstileSiteKey,
   nodeEnv: process.env.NODE_ENV || "development",
   isDevelopment: process.env.NODE_ENV === "development",
@@ -52,8 +44,8 @@ export const clientConfig = {
 export function validateClientConfig() {
   const errors: string[] = [];
 
-  if (!flaskApiUrl) {
-    errors.push("NEXT_PUBLIC_FLASK_API_URL must be set");
+  if (!apiUrl) {
+    errors.push("NEXT_PUBLIC_API_URL must be set");
   }
 
   if (errors.length > 0) {
