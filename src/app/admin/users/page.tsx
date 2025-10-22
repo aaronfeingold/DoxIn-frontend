@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import GenerateAccessCodeModal from "@/components/GenerateAccessCodeModal";
 import SendInvitationModal from "@/components/SendInvitationModal";
 import Image from "next/image";
+import { clientConfig } from "@/config/client";
 
 interface User {
   id: string;
@@ -70,7 +71,9 @@ export default function AdminUsersPage() {
         ...(search && { search }),
       });
 
-      const response = await fetch(`/api/admin/users?${params}`);
+      const response = await fetch(
+        `${clientConfig.nextApiVer}/admin/users?${params}`
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch users");

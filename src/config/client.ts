@@ -21,10 +21,15 @@ export const apiUrl =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 /**
- * API Version
+ * API (external)Version
  */
-export const apiVersion = process.env.NEXT_PUBLIC_API_VERSION || "/api/v1";
-
+export const apiVersion = process.env.NEXT_PUBLIC_API_VERSION || "v0";
+export const apiVer = `/api/${apiVersion}`;
+/**
+ * NextJS API Version
+ */
+export const nextApiVersion = process.env.NEXT_PUBLIC_NEXT_API_VERSION || "v0";
+export const nextApiVer = `/api/${nextApiVersion}`;
 /**
  * Cloudflare Turnstile Site Key (CAPTCHA)
  */
@@ -37,7 +42,10 @@ export const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 export const clientConfig = {
   apiUrl,
   apiVersion,
-  baseUrl: `${apiUrl}${apiVersion}`,
+  apiVer,
+  nextApiVersion,
+  nextApiVer,
+  baseUrl: `${apiUrl}${apiVer}`,
   turnstileSiteKey,
   nodeEnv: process.env.NODE_ENV || "development",
   isDevelopment: process.env.NODE_ENV === "development",

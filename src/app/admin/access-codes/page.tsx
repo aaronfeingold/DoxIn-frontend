@@ -24,6 +24,7 @@ import {
   Users,
   Key,
 } from "lucide-react";
+import { clientConfig } from "@/config/client";
 
 interface AccessCode {
   id: string;
@@ -85,7 +86,9 @@ export default function AccessCodesPage() {
         params.append("search", searchQuery);
       }
 
-      const response = await fetch(`/api/admin/access-codes?${params}`);
+      const response = await fetch(
+        `${clientConfig.nextApiVer}/admin/access-codes?${params}`
+      );
 
       if (!response.ok) {
         if (response.status === 403) {

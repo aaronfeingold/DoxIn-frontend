@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { X, Key, Copy, Check } from "lucide-react";
 import { toast } from "sonner";
+import { clientConfig } from "@/config/client";
 
 interface GenerateAccessCodeModalProps {
   isOpen: boolean;
@@ -26,10 +27,13 @@ export default function GenerateAccessCodeModal({
   const handleGenerate = async () => {
     setIsGenerating(true);
     try {
-      const response = await fetch("/api/auth/generate-access-code", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
+      const response = await fetch(
+        `${clientConfig.nextApiVer}/auth/generate-access-code`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to generate access code");

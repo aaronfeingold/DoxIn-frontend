@@ -13,6 +13,7 @@ import {
   User,
 } from "lucide-react";
 import { toast } from "sonner";
+import { clientConfig } from "@/config/client";
 
 interface AuditLog {
   id: string;
@@ -78,7 +79,9 @@ export default function AdminAuditLogPage() {
         ...(userFilter && { changed_by: userFilter }),
       });
 
-      const response = await fetch(`/api/admin/audit-log?${params}`);
+      const response = await fetch(
+        `${clientConfig.nextApiVer}/admin/audit-log?${params}`
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch audit logs");

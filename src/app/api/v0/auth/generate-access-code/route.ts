@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
     // Get the base URL for the invitation link
     const baseUrl =
       serverConfig.betterAuthUrl || req.headers.get("origin") || "";
-    const invitationUrl = `${baseUrl}/auth/signup?access_code=${accessCode}`;
+    const invitationUrl = `${baseUrl}/auth/signup?accessCode=${accessCode}`;
 
     console.log(
       `Generated access code ${accessCode} (expires in ${expiryHours}h)`

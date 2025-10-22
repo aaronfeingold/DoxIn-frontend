@@ -24,8 +24,8 @@ export const apiUrl = process.env.API_URL || "http://localhost:5000";
 /**
  * API Version
  */
-export const apiVersion = process.env.NEXT_PUBLIC_API_VERSION || "/api/v1";
-
+export const apiVersion = process.env.NEXT_PUBLIC_API_VERSION || "v0";
+export const apiVer = `/api/${apiVersion}`;
 /**
  * Better Auth Configuration
  */
@@ -61,7 +61,8 @@ export const databaseUrl = process.env.DATABASE_URL;
 export const serverConfig = {
   apiVersion,
   apiUrl,
-  baseUrl: `${apiUrl}${apiVersion}`,
+  apiVer,
+  baseUrl: `${apiUrl}${apiVer}`,
   betterAuthUrl,
   betterAuthSecret,
   resendApiKey,

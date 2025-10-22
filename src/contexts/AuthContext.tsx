@@ -108,10 +108,13 @@ export function AuthContextProvider({
         const sessionData: SessionInfoResponse = await sessionResponse.json();
 
         try {
-          const profileResponse = await fetch("/api/user/profile", {
-            credentials: "include",
-            cache: "no-store",
-          });
+          const profileResponse = await fetch(
+            `${clientConfig.nextApiVer}/user/profile`,
+            {
+              credentials: "include",
+              cache: "no-store",
+            }
+          );
 
           if (profileResponse.ok) {
             const userData = await profileResponse.json();

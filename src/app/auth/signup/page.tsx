@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Shield, Eye, EyeOff, Check, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
+import { clientConfig } from "@/config/client";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -23,7 +24,7 @@ export default function SignupPage() {
 
   // Load access code from URL query param if present
   useEffect(() => {
-    const codeFromUrl = searchParams.get("code");
+    const codeFromUrl = searchParams.get("accessCode");
     if (codeFromUrl) {
       setAccessCode(codeFromUrl);
       validateAccessCode(codeFromUrl);
@@ -42,7 +43,12 @@ export default function SignupPage() {
 
     try {
       const response = await fetch(
-        `/api/auth/validate-access-code?code=${code}`
+        `${clientConfig.nextApiVer}/auth/validate-access-code`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ accessCode: code }),
+        }
       );
       const data = await response.json();
 
@@ -94,11 +100,14 @@ export default function SignupPage() {
       setIsSubmitting(true);
 
       // Mark access code as used before creating the account
-      const useCodeResponse = await fetch("/api/auth/use-access-code", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: accessCode, email }),
-      });
+      const useCodeResponse = await fetch(
+        `${clientConfig.nextApiVer}/auth/use-access-code`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ accessCode, email }),
+        }
+      );
 
       if (!useCodeResponse.ok) {
         const data = await useCodeResponse.json();
@@ -113,7 +122,9 @@ export default function SignupPage() {
       });
 
       // Track initial login event
-      await fetch("/api/auth/track-login", { method: "POST" });
+      await fetch(`${clientConfig.nextApiVer}/auth/track-login`, {
+        method: "POST",
+      });
 
       toast.success("Account created successfully!");
       router.push("/dashboard");

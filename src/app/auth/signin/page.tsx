@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Shield, Eye, EyeOff, Mail, KeyRound } from "lucide-react";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
+import { clientConfig } from "@/config/client";
 
 type AuthMethod = "password" | "magic-link";
 
@@ -36,7 +37,9 @@ export default function SignInPage() {
       });
 
       // Track login event
-      await fetch("/api/auth/track-login", { method: "POST" });
+      await fetch(`${clientConfig.nextApiVer}/auth/track-login`, {
+        method: "POST",
+      });
 
       toast.success("Signed in successfully!");
 
@@ -63,17 +66,22 @@ export default function SignInPage() {
     try {
       setIsSubmitting(true);
 
-      const response = await fetch("/api/auth/magic-link", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
+      const response = await fetch(
+        `${clientConfig.nextApiVer}/auth/magic-link`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        }
+      );
 
       const data = await response.json();
 
       if (!response.ok) {
         if (response.status === 429) {
-          toast.error(data.message || "Too many requests. Please try again later.");
+          toast.error(
+            data.message || "Too many requests. Please try again later."
+          );
         } else {
           toast.error(data.error || "Failed to send magic link");
         }
@@ -106,8 +114,8 @@ export default function SignInPage() {
               <span className="font-medium">{email}</span>
             </p>
             <p className="mt-4 text-base text-gray-700">
-              Click the link in your email to sign in. The link will expire in 15
-              minutes.
+              Click the link in your email to sign in. The link will expire in
+              15 minutes.
             </p>
             <div className="mt-8">
               <button

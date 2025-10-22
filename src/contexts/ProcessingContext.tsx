@@ -179,7 +179,7 @@ export function ProcessingProvider({
     const formData = new FormData();
     formData.append("file", file);
 
-    const response = await fetch("/api/upload", {
+    const response = await fetch(`${clientConfig.apiVersion}/upload`, {
       method: "POST",
       body: formData,
     });

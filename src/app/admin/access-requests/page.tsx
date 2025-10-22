@@ -24,6 +24,7 @@ import {
   Loader2,
   RefreshCw,
 } from "lucide-react";
+import { clientConfig } from "@/config/client";
 
 interface AccessRequest {
   id: string;
@@ -73,7 +74,9 @@ export default function AccessRequestsPage() {
         params.append("search", searchQuery);
       }
 
-      const response = await fetch(`/api/admin/access-requests?${params}`);
+      const response = await fetch(
+        `${clientConfig.nextApiVer}/admin/access-requests?${params}`
+      );
 
       if (!response.ok) {
         if (response.status === 403) {
@@ -98,7 +101,7 @@ export default function AccessRequestsPage() {
     try {
       setProcessingAction(true);
       const response = await fetch(
-        `/api/admin/access-requests/${requestId}/approve`,
+        `${clientConfig.nextApiVer}/admin/access-requests/${requestId}/approve`,
         {
           method: "POST",
         }
@@ -127,7 +130,7 @@ export default function AccessRequestsPage() {
     try {
       setProcessingAction(true);
       const response = await fetch(
-        `/api/admin/access-requests/${requestId}/reject`,
+        `${clientConfig.nextApiVer}/admin/access-requests/${requestId}/reject`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -160,11 +163,14 @@ export default function AccessRequestsPage() {
 
     try {
       setProcessingAction(true);
-      const response = await fetch("/api/admin/access-requests/batch-approve", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ requestIds: Array.from(selectedRequests) }),
-      });
+      const response = await fetch(
+        `${clientConfig.nextApiVer}/admin/access-requests/batch-approve`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ requestIds: Array.from(selectedRequests) }),
+        }
+      );
 
       if (!response.ok) {
         const data = await response.json();
@@ -204,7 +210,7 @@ export default function AccessRequestsPage() {
     try {
       setProcessingAction(true);
       const response = await fetch(
-        "/api/admin/access-requests/batch-send-invitations",
+        `${clientConfig.nextApiVer}/admin/access-requests/batch-send-invitations`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

@@ -1,3 +1,5 @@
+import { clientConfig } from "@/config/client";
+
 /**
  * Helper to fetch a short-lived JWT from the Next.js bridge route.
  * The token stays in memory on the client; avoid persisting it long term.
@@ -6,7 +8,7 @@ export async function fetchJwtToken(): Promise<{
   token: string;
   expires_at: string;
 }> {
-  const resp = await fetch("/api/get-jwt", {
+  const resp = await fetch(`${clientConfig.nextApiVer}/get-jwt`, {
     method: "POST",
     credentials: "include",
   });

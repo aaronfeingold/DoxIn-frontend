@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { TurnstileCaptcha } from "@/components/TurnstileCaptcha";
 import { toast } from "sonner";
+import { clientConfig } from "@/config/client";
 
 export default function RequestAccessPage() {
   const router = useRouter();
@@ -39,22 +40,27 @@ export default function RequestAccessPage() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("/api/auth/request-access", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...formData,
-          captchaToken,
-        }),
-      });
+      const response = await fetch(
+        `${clientConfig.nextApiVer}/auth/request-access`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ...formData,
+            captchaToken,
+          }),
+        }
+      );
 
       const data = await response.json();
 
       if (!response.ok) {
         if (response.status === 429) {
-          toast.error(data.message || "Too many requests. Please try again later.");
+          toast.error(
+            data.message || "Too many requests. Please try again later."
+          );
         } else if (response.status === 409) {
           toast.error(data.message || data.error);
         } else {
@@ -100,8 +106,8 @@ export default function RequestAccessPage() {
               Your access request has been submitted successfully.
             </p>
             <p className="mt-4 text-base text-gray-700 dark:text-gray-300">
-              An administrator will review your request shortly. You&apos;ll receive an
-              email with your access code once approved.
+              An administrator will review your request shortly. You&apos;ll
+              receive an email with your access code once approved.
             </p>
             <div className="mt-8">
               <Link

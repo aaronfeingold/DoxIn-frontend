@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { X, Mail, Send, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
+import { clientConfig } from "@/config/client";
 
 interface SendInvitationModalProps {
   isOpen: boolean;
@@ -38,10 +39,13 @@ export default function SendInvitationModal({
 
     try {
       // Step 1: Generate access code
-      const codeResponse = await fetch("/api/auth/generate-access-code", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
+      const codeResponse = await fetch(
+        `${clientConfig.nextApiVer}/auth/generate-access-code`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
 
       if (!codeResponse.ok) {
         throw new Error("Failed to generate access code");
@@ -50,18 +54,21 @@ export default function SendInvitationModal({
       const codeData = await codeResponse.json();
 
       // Step 2: Send invitation email
-      const emailResponse = await fetch("/api/send-invitation", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          to: email,
-          recipientName: name,
-          accessCode: codeData.access_code,
-          invitationUrl: codeData.invitation_url,
-          expiryHours: codeData.expiry_hours,
-          personalMessage: personalMessage || undefined,
-        }),
-      });
+      const emailResponse = await fetch(
+        `${clientConfig.nextApiVer}/send-invitation`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            to: email,
+            recipientName: name,
+            accessCode: codeData.access_code,
+            invitationUrl: codeData.invitation_url,
+            expiryHours: codeData.expiry_hours,
+            personalMessage: personalMessage || undefined,
+          }),
+        }
+      );
 
       if (!emailResponse.ok) {
         throw new Error("Failed to send invitation email");
