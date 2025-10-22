@@ -440,6 +440,8 @@ export default function InvoiceReviewModal({
                       <Image
                         src={blobUrl}
                         alt="Invoice preview"
+                        width={400}
+                        height={400}
                         className="w-full h-full object-contain"
                         onLoad={() => setImageLoading(false)}
                         onError={() => {
