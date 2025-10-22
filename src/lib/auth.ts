@@ -65,6 +65,11 @@ export const auth = betterAuth({
     "http://localhost:65228",
     "http://10.0.0.27:3000",
     "http://10.0.0.27:3001",
+    "https://doxin.xyz",
+    "https://www.doxin.xyz",
+    "https://api.doxin.xyz",
+    "https://api.www.doxin.xyz",
+    "https://api.www.doxin.xyz",
   ],
   user: {
     // Include additional fields in the session
