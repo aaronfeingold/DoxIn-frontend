@@ -71,7 +71,7 @@ interface InvoiceReviewModalProps {
   taskId: string | null;
   isOpen: boolean;
   onClose: () => void;
-  onApprove?: (result?: any) => void;
+  onApprove?: (result?: Record<string, unknown>) => void;
 }
 
 export default function InvoiceReviewModal({
