@@ -13,6 +13,7 @@ import {
 import { toast } from "sonner";
 import { clientConfig } from "@/config/client";
 import Image from "next/image";
+import type { ApiErrorResponse } from "@/types/api";
 
 interface LineItem {
   id?: string;
@@ -117,7 +118,7 @@ export default function InvoiceEditModal({
       );
 
       if (!response.ok) {
-        const error = await response.json();
+        const error: ApiErrorResponse = await response.json();
         throw new Error(error.error || "Failed to fetch invoice");
       }
 
@@ -137,7 +138,9 @@ export default function InvoiceEditModal({
       setInvoice(data);
     } catch (error) {
       console.error("Error fetching invoice:", error);
-      toast.error("Failed to load invoice");
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to load invoice";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -161,7 +164,7 @@ export default function InvoiceEditModal({
       );
 
       if (!response.ok) {
-        const error = await response.json();
+        const error: ApiErrorResponse = await response.json();
         throw new Error(error.error || "Failed to update invoice");
       }
 

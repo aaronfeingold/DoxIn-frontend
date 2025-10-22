@@ -4,6 +4,7 @@ import { useState } from "react";
 import { X, Download, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { clientConfig } from "@/config/client";
+import type { ApiErrorResponse } from "@/types/api";
 
 interface GenerateReportModalProps {
   isOpen: boolean;
@@ -136,7 +137,7 @@ export default function GenerateReportModal({
         }, 2000);
         setPollingInterval(interval);
       } else {
-        const error = await response.json();
+        const error: ApiErrorResponse = await response.json();
         toast.error(error.error || "Failed to generate report");
         setIsGenerating(false);
       }

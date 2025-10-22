@@ -14,6 +14,7 @@ import {
 import { toast } from "sonner";
 import { clientConfig } from "@/config/client";
 import Image from "next/image";
+import type { ApiErrorResponse } from "@/types/api";
 
 interface LineItem {
   line_number: number;
@@ -105,7 +106,7 @@ export default function InvoiceReviewModal({
       );
 
       if (!response.ok) {
-        const error = await response.json();
+        const error: ApiErrorResponse = await response.json();
         throw new Error(error.error || "Failed to fetch job details");
       }
 
@@ -118,9 +119,11 @@ export default function InvoiceReviewModal({
       } else if (data.job?.result_data?.blob_url) {
         setBlobUrl(data.job.result_data.blob_url);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error fetching job details:", error);
-      toast.error("Failed to load invoice data");
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to load invoice data";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -140,7 +143,7 @@ export default function InvoiceReviewModal({
       );
 
       if (!response.ok) {
-        const error = await response.json();
+        const error: ApiErrorResponse = await response.json();
         throw new Error(error.error || "Failed to approve invoice");
       }
 
@@ -148,9 +151,11 @@ export default function InvoiceReviewModal({
       toast.success("Invoice approved and saved successfully");
       onApprove?.(result);
       onClose();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error approving invoice:", error);
-      toast.error(error.message || "Failed to approve invoice");
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to approve invoice";
+      toast.error(errorMessage);
     } finally {
       setSaving(false);
     }
