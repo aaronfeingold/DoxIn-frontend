@@ -13,6 +13,7 @@ import { useAuth } from "./AuthContext";
 import { toast } from "sonner";
 import { io, Socket } from "socket.io-client";
 import { clientConfig } from "@/config/client";
+import { ProcessingJob } from "@prisma/client";
 
 interface NotificationContextType {
   unreadCount: number;
@@ -33,7 +34,7 @@ export function NotificationProvider({
   const [unreadCount, setUnreadCount] = useState(0);
   const { jobs } = useProcessing();
   const { user } = useAuth();
-  const previousJobsRef = useRef<Map<string, any>>(new Map());
+  const previousJobsRef = useRef<Map<string, unknown>>(new Map());
   const notificationSocketRef = useRef<Socket | null>(null);
 
   const refreshUnreadCount = useCallback(async () => {
@@ -142,38 +143,41 @@ export function NotificationProvider({
       socket.emit("join_user_notifications", { user_id: user.id });
     });
 
-    socket.on("joined_notifications", (data: any) => {
+    socket.on("joined_notifications", (data: { room: string }) => {
       console.log("Joined notification room:", data.room);
     });
 
     // Listen for user-specific notifications
-    socket.on("user_notification", (data: any) => {
-      console.log("Received user notification:", data);
+    socket.on(
+      "user_notification",
+      (data: { type: string; filename: string; error: string }) => {
+        console.log("Received user notification:", data);
 
-      // Handle job completion/failure notifications directly
-      if (data.type === "job_completed") {
-        // Increment unread count immediately
-        setUnreadCount((prev) => prev + 1);
+        // Handle job completion/failure notifications directly
+        if (data.type === "job_completed") {
+          // Increment unread count immediately
+          setUnreadCount((prev) => prev + 1);
 
-        // Show notification toast
-        toast.success(
-          `Processing completed for ${data.filename || "your file"}`,
-          {
-            description: "Click the notification bell to view results",
+          // Show notification toast
+          toast.success(
+            `Processing completed for ${data.filename || "your file"}`,
+            {
+              description: "Click the notification bell to view results",
+              duration: 5000,
+            }
+          );
+        } else if (data.type === "job_failed") {
+          // Increment unread count for failed jobs too
+          setUnreadCount((prev) => prev + 1);
+
+          // Show error notification
+          toast.error(`Processing failed for ${data.filename || "your file"}`, {
+            description: data.error || "Check job details for more information",
             duration: 5000,
-          }
-        );
-      } else if (data.type === "job_failed") {
-        // Increment unread count for failed jobs too
-        setUnreadCount((prev) => prev + 1);
-
-        // Show error notification
-        toast.error(`Processing failed for ${data.filename || "your file"}`, {
-          description: data.error || "Check job details for more information",
-          duration: 5000,
-        });
+          });
+        }
       }
-    });
+    );
 
     notificationSocketRef.current = socket;
 
@@ -183,27 +187,7 @@ export function NotificationProvider({
   }, [user?.id]);
 
   // Listen to WebSocket job updates in real-time
-  // Note: Toasts are now handled by user_notification WebSocket events to avoid duplicates
-  // This effect just ensures unread count stays in sync with jobs Map for edge cases
   useEffect(() => {
-    const previousJobs = previousJobsRef.current;
-
-    jobs.forEach((job, taskId) => {
-      const previousJob = previousJobs.get(taskId);
-
-      // Check if job just completed or failed
-      if (previousJob && previousJob.status !== job.status) {
-        if (job.status === "completed" || job.status === "failed") {
-          // Note: unread count increment and toasts are handled by user_notification event
-          // This is just a fallback in case the user_notification event doesn't fire
-          console.log(
-            `Job ${taskId} status changed to ${job.status}, user_notification event should handle notifications`
-          );
-        }
-      }
-    });
-
-    // Update the ref with current jobs
     previousJobsRef.current = new Map(jobs);
   }, [jobs]);
 
