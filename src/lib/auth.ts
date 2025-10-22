@@ -16,14 +16,13 @@
  */
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { PrismaClient } from "@prisma/client";
 import { randomUUID } from "crypto";
 import { Resend } from "resend";
 import { getSessionRedisClient } from "./redis";
 import { serverConfig } from "@/config/server";
 import { getMagicLinkEmailHtml } from "./magic-link";
+import { prisma } from "./prisma";
 
-const prisma = new PrismaClient();
 const resend = new Resend(serverConfig.resendApiKey);
 
 // Get Redis client for sessions (DB 2)
