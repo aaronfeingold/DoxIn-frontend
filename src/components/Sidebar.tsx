@@ -22,7 +22,6 @@ import { useNotifications } from "@/contexts/NotificationContext";
 import { signOut } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import Image from "next/image";
 
 interface NavItem {
   name: string;
