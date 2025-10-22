@@ -70,7 +70,7 @@ interface InvoiceReviewModalProps {
   taskId: string | null;
   isOpen: boolean;
   onClose: () => void;
-  onApprove?: () => void;
+  onApprove?: (result?: any) => void;
 }
 
 export default function InvoiceReviewModal({
@@ -145,7 +145,7 @@ export default function InvoiceReviewModal({
 
       const result = await response.json();
       toast.success("Invoice approved and saved successfully");
-      onApprove?.();
+      onApprove?.(result);
       onClose();
     } catch (error: any) {
       console.error("Error approving invoice:", error);
