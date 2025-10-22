@@ -579,10 +579,14 @@ export default function JobsPage() {
                           <div className="flex items-center gap-2 text-green-600">
                             <CheckCircle2 className="h-4 w-4" />
                             <span>Saved to database</span>
-                            {selectedJob.result_data.invoice_id && (
+                            {typeof selectedJob.result_data.invoice_id ===
+                              "string" && (
                               <span className="text-sm text-muted-foreground">
                                 (ID:{" "}
-                                {selectedJob.result_data.invoice_id.slice(0, 8)}
+                                {selectedJob.result_data.invoice_id.substring(
+                                  0,
+                                  8
+                                )}
                                 ...)
                               </span>
                             )}
