@@ -80,8 +80,8 @@ export const serverConfig = {
 export function validateServerConfig() {
   const errors: string[] = [];
 
-  if (!flaskApiUrl) {
-    errors.push("FLASK_API_URL or NEXT_PUBLIC_FLASK_API_URL must be set");
+  if (!apiUrl) {
+    errors.push("API_URL must be set");
   }
 
   if (!betterAuthSecret) {
