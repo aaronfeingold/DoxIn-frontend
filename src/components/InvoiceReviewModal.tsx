@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { clientConfig } from "@/config/client";
+import Image from "next/image";
 
 interface LineItem {
   line_number: number;
@@ -436,7 +437,7 @@ export default function InvoiceReviewModal({
                           <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
                         </div>
                       )}
-                      <img
+                      <Image
                         src={blobUrl}
                         alt="Invoice preview"
                         className="w-full h-full object-contain"
