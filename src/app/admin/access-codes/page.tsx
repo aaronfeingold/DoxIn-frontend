@@ -10,7 +10,7 @@
  * - Statistics and analytics
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
@@ -71,11 +71,7 @@ export default function AccessCodesPage() {
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
-    fetchCodes();
-  }, [statusFilter, typeFilter, searchQuery]);
-
-  const fetchCodes = async () => {
+  const fetchCodes = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
@@ -109,7 +105,11 @@ export default function AccessCodesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [statusFilter, typeFilter, searchQuery, router]);
+
+  useEffect(() => {
+    fetchCodes();
+  }, [fetchCodes]);
 
   const getStatusBadge = (code: AccessCode) => {
     const now = new Date();
@@ -439,7 +439,9 @@ export default function AccessCodesPage() {
                       {getTypeBadge(code.generationType)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                      {code.generatedByUser?.name || code.generatedByUser?.email || "-"}
+                      {code.generatedByUser?.name ||
+                        code.generatedByUser?.email ||
+                        "-"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                       {code.usedByEmail || "-"}
