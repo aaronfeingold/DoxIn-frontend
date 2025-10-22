@@ -38,8 +38,7 @@ export const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
  * Use this for convenient access to all client-side config
  */
 export const clientConfig = {
-  flaskApiUrl,
-  backendUrl,
+  apiUrl: backendUrl,
   turnstileSiteKey,
   nodeEnv: process.env.NODE_ENV || "development",
   isDevelopment: process.env.NODE_ENV === "development",
