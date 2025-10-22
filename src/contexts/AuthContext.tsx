@@ -10,6 +10,7 @@ import React, {
 import { useSession } from "@/lib/auth-client";
 import type { User } from "@prisma/client";
 import { fetchJwtToken } from "@/lib/jwt";
+import { clientConfig } from "@/config/client";
 
 interface AuthContextType {
   user: User | null;
@@ -26,6 +27,33 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+interface SessionInfoResponse {
+  user_id: string;
+  email: string;
+  role: string;
+  last_login?: string | null;
+  is_active?: boolean;
+  name?: string | null;
+}
+
+const mapSessionInfoToUser = (session: SessionInfoResponse): User => {
+  const now = new Date();
+
+  return {
+    id: session.user_id,
+    email: session.email,
+    name: session.name ?? null,
+    image: null,
+    emailVerified: false,
+    accessCode: null,
+    role: session.role,
+    isActive: session.is_active ?? true,
+    lastLogin: session.last_login ? new Date(session.last_login) : null,
+    createdAt: now,
+    updatedAt: now,
+  };
+};
+
 export function AuthContextProvider({
   children,
 }: {
@@ -41,13 +69,15 @@ export function AuthContextProvider({
   const [jwtError, setJwtError] = useState<string | null>(null);
 
   const loadUser = useCallback(
-    async (showLoading = true) => {
-      if (!session?.user) {
+    async (options: { showLoading?: boolean; token?: string } = {}) => {
+      const { showLoading = true, token } = options;
+      const activeToken = token ?? jwtToken;
+
+      if (!activeToken) {
+        if (showLoading) {
+          setIsLoading(false);
+        }
         setUser(null);
-        setIsLoading(false);
-        setJwtToken(null);
-        setJwtExpiresAt(null);
-        setJwtError(null);
         return;
       }
 
@@ -55,13 +85,52 @@ export function AuthContextProvider({
       setError(null);
 
       try {
-        const response = await fetch("/api/user/profile");
-        if (!response.ok) {
-          throw new Error("Failed to load user profile");
+        const { apiUrl } = clientConfig;
+
+        if (!apiUrl) {
+          throw new Error("API URL not configured");
         }
 
-        const userData = await response.json();
-        setUser(userData as User);
+        const sessionInfoUrl = `${apiUrl}/api/v1/auth/session-info`;
+
+        const sessionResponse = await fetch(sessionInfoUrl, {
+          headers: {
+            Authorization: `Bearer ${activeToken}`,
+          },
+          credentials: "include",
+          cache: "no-store",
+        });
+
+        if (!sessionResponse.ok) {
+          throw new Error("Failed to load session info");
+        }
+
+        const sessionData: SessionInfoResponse = await sessionResponse.json();
+
+        try {
+          const profileResponse = await fetch("/api/user/profile", {
+            credentials: "include",
+            cache: "no-store",
+          });
+
+          if (profileResponse.ok) {
+            const userData = await profileResponse.json();
+            setUser(userData as User);
+            return;
+          }
+
+          console.warn(
+            "User profile request failed, using session info fallback:",
+            profileResponse.status
+          );
+        } catch (profileError) {
+          console.warn(
+            "User profile request error, using session info fallback:",
+            profileError
+          );
+        }
+
+        setUser(mapSessionInfoToUser(sessionData));
       } catch (err) {
         console.error("Failed to load user:", err);
         setError(err instanceof Error ? err.message : "Failed to load user");
@@ -70,7 +139,7 @@ export function AuthContextProvider({
         if (showLoading) setIsLoading(false);
       }
     },
-    [session?.user]
+    [jwtToken]
   );
 
   const loadJwtToken = useCallback(async () => {
@@ -78,7 +147,7 @@ export function AuthContextProvider({
       setJwtToken(null);
       setJwtExpiresAt(null);
       setJwtError(null);
-      return;
+      return null;
     }
 
     setIsJwtLoading(true);
@@ -88,6 +157,7 @@ export function AuthContextProvider({
       const { token, expires_at } = await fetchJwtToken();
       setJwtToken(token);
       setJwtExpiresAt(expires_at);
+      return token;
     } catch (err) {
       console.error("Failed to fetch JWT token:", err);
       setJwtToken(null);
@@ -95,13 +165,21 @@ export function AuthContextProvider({
       setJwtError(
         err instanceof Error ? err.message : "Failed to fetch JWT token"
       );
+      return null;
     } finally {
       setIsJwtLoading(false);
     }
   }, [session?.user]);
 
   const refreshUser = async () => {
-    await loadUser(false);
+    const token = jwtToken ?? (await loadJwtToken());
+
+    if (!token) {
+      setUser(null);
+      return;
+    }
+
+    await loadUser({ showLoading: true, token });
   };
 
   const refreshJwtToken = async () => {
@@ -109,27 +187,53 @@ export function AuthContextProvider({
   };
 
   useEffect(() => {
+    let isActive = true;
+
     if (isPending) {
       setIsLoading(true);
       return;
     }
 
-    if (session?.user) {
-      loadUser(true);
-      loadJwtToken();
-    } else {
+    if (!session?.user) {
       setUser(null);
       setIsLoading(false);
       setJwtToken(null);
       setJwtExpiresAt(null);
       setJwtError(null);
+      return;
     }
-  }, [session?.user, isPending, loadUser, loadJwtToken]);
+
+    const initializeAuth = async () => {
+      setIsLoading(true);
+      try {
+        const token = await loadJwtToken();
+
+        if (!isActive) return;
+
+        if (!token) {
+          setUser(null);
+          return;
+        }
+
+        await loadUser({ showLoading: false, token });
+      } finally {
+        if (isActive) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void initializeAuth();
+
+    return () => {
+      isActive = false;
+    };
+  }, [session?.user, isPending, loadJwtToken, loadUser]);
 
   const value: AuthContextType = {
     user,
     isLoading: isLoading || isPending || isJwtLoading,
-    isAuthenticated: !!session?.user,
+    isAuthenticated: Boolean(user),
     error,
     refreshUser,
     jwtToken,
