@@ -19,14 +19,12 @@
  * Flask/Python Backend API URL
  * Checks server-only FLASK_API_URL first, falls back to public var
  */
-export const flaskApiUrl =
-  process.env.FLASK_API_URL || process.env.NEXT_PUBLIC_FLASK_API_URL;
+export const apiUrl = process.env.API_URL || "http://localhost:5000";
 
 /**
- * Backend URL for WebSocket connections (same as Flask API URL)
+ * API Version
  */
-export const backendUrl =
-  process.env.NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_FLASK_API_URL;
+export const apiVersion = process.env.NEXT_PUBLIC_API_VERSION || "/api/v1";
 
 /**
  * Better Auth Configuration
@@ -61,8 +59,9 @@ export const databaseUrl = process.env.DATABASE_URL;
  * Use this for convenient access to all server-side config
  */
 export const serverConfig = {
-  flaskApiUrl,
-  backendUrl,
+  apiVersion,
+  apiUrl,
+  baseUrl: `${apiUrl}${apiVersion}`,
   betterAuthUrl,
   betterAuthSecret,
   resendApiKey,
