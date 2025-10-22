@@ -10,9 +10,9 @@ import {
   Image as ImageIcon,
   ZoomIn,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { clientConfig } from "@/config/client";
+import Image from "next/image";
 
 interface LineItem {
   id?: string;
@@ -548,7 +548,7 @@ export default function InvoiceEditModal({
                           className="relative cursor-pointer group border border-border rounded-lg overflow-hidden"
                           onClick={() => setImageExpanded(true)}
                         >
-                          <img
+                          <Image
                             src={invoice.blob_url}
                             alt="Invoice"
                             className="w-full h-auto"
@@ -557,6 +557,8 @@ export default function InvoiceEditModal({
                               setImageLoading(false);
                               toast.error("Failed to load invoice image");
                             }}
+                            width={400}
+                            height={400}
                           />
                           <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                             <ZoomIn className="h-8 w-8 text-white" />
@@ -623,9 +625,11 @@ export default function InvoiceEditModal({
           >
             <X className="h-8 w-8" />
           </button>
-          <img
+          <Image
             src={invoice.blob_url}
             alt="Invoice (expanded)"
+            width={400}
+            height={400}
             className="max-w-full max-h-full object-contain"
           />
         </div>
