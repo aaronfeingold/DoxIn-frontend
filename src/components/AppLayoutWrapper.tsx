@@ -26,11 +26,7 @@ export function AppLayoutWrapper({ children }: AppLayoutWrapperProps) {
   );
 
   const showSidebar = !isLoading && isAuthenticated && !isPublicRoute;
-  console.log("showSidebar", showSidebar);
-  console.log("isLoading", isLoading);
-  console.log("isAuthenticated", isAuthenticated);
-  console.log("isPublicRoute", isPublicRoute);
-  console.log("pathname", pathname);
+
   return (
     <>
       {showSidebar && <Sidebar />}
