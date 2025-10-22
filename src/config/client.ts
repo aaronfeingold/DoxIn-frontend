@@ -15,7 +15,7 @@
  * - Anywhere in the app
  */
 /**
- * API URL
+ * API URL - this will become the ELB URL eventually with HTTPS
  */
 export const apiUrl =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
