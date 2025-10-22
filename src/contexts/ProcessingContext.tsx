@@ -25,7 +25,7 @@ interface ProcessingJob {
   filename: string;
   status: "pending" | "processing" | "completed" | "failed";
   progress: number;
-  result?: any;
+  result?: Record<string, unknown>;
   error?: string;
 }
 
