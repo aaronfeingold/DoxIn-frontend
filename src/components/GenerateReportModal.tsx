@@ -96,7 +96,7 @@ export default function GenerateReportModal({
     setIsGenerating(true);
 
     try {
-      const params: any = {};
+      const params: Record<string, string> = {};
 
       if (startDate) {
         params.start_date = startDate;
