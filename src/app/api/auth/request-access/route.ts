@@ -11,15 +11,13 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 import { verifyTurnstileToken } from "@/components/TurnstileCaptcha";
 import {
   checkRateLimit,
   getAccessRequestLimiter,
   formatRateLimitError,
 } from "@/lib/rate-limit";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 export async function POST(request: NextRequest) {
   try {

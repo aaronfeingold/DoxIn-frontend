@@ -9,14 +9,12 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { Resend } from "resend";
 import crypto from "crypto";
 import { serverConfig } from "@/config/server";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 const resend = new Resend(serverConfig.resendApiKey);
 
 /**

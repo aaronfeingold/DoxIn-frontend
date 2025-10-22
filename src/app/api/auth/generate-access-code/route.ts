@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import {
@@ -8,8 +7,7 @@ import {
   formatRateLimitError,
 } from "@/lib/rate-limit";
 import { serverConfig } from "@/config/server";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 // Generate a secure 12-character access code
 function generateAccessCode(): string {
