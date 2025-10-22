@@ -604,10 +604,14 @@ export default function JobsPage() {
                               <span>Pending Approval</span>
                             </div>
                             {selectedJob.status === "completed" &&
-                              selectedJob.result_data.extraction_result
-                                ?.success &&
+                              (
+                                selectedJob.result_data.extraction_result as {
+                                  success: boolean;
+                                }
+                              )?.success &&
                               !isDuplicateError(
-                                selectedJob.result_data.save_skip_reason
+                                selectedJob.result_data
+                                  .save_skip_reason as string
                               ) && (
                                 <button
                                   onClick={() =>
@@ -621,9 +625,11 @@ export default function JobsPage() {
                               )}
                           </div>
                         )}
-                        {selectedJob.result_data.save_skip_reason && (
+                        {(selectedJob.result_data
+                          .save_skip_reason as string) && (
                           <p className="text-sm text-muted-foreground mt-1">
-                            {selectedJob.result_data.save_skip_reason}
+                            {(selectedJob.result_data
+                              .save_skip_reason as string) || ""}
                           </p>
                         )}
                       </div>
@@ -636,7 +642,8 @@ export default function JobsPage() {
                           Duplicate Detected
                         </h3>
                         <p className="text-sm text-yellow-700">
-                          {selectedJob.result_data.save_skip_reason ||
+                          {(selectedJob.result_data
+                            .save_skip_reason as string) ||
                             "This invoice number already exists in the system"}
                         </p>
                       </div>
@@ -652,15 +659,19 @@ export default function JobsPage() {
                           This invoice requires human review due to low
                           confidence or validation errors.
                         </p>
-                        {selectedJob.result_data.validation_errors &&
-                          selectedJob.result_data.validation_errors.length >
-                            0 && (
+                        {(selectedJob.result_data
+                          .validation_errors as string[]) &&
+                          (
+                            selectedJob.result_data
+                              .validation_errors as string[]
+                          ).length > 0 && (
                             <ul className="mt-2 text-sm text-blue-700 list-disc list-inside">
-                              {selectedJob.result_data.validation_errors.map(
-                                (error: string, idx: number) => (
-                                  <li key={idx}>{error}</li>
-                                )
-                              )}
+                              {(
+                                selectedJob.result_data
+                                  .validation_errors as string[]
+                              ).map((error: string, idx: number) => (
+                                <li key={idx}>{error}</li>
+                              ))}
                             </ul>
                           )}
                       </div>
@@ -674,7 +685,8 @@ export default function JobsPage() {
                         </h3>
                         <p className="text-foreground mt-1">
                           {(
-                            selectedJob.result_data.confidence_score * 100
+                            (selectedJob.result_data
+                              .confidence_score as number) * 100
                           ).toFixed(0)}
                           %
                         </p>
