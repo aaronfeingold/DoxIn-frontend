@@ -98,58 +98,70 @@ export function ProcessingProvider({
     });
 
     // Listen for joined_task confirmation
-    socket.on("joined_task", (data: any) => {
+    socket.on("joined_task", (data: { task_id: string }) => {
       console.log("Successfully joined task room:", data);
     });
 
     // Listen for task updates (backend uses 'task_update' event)
-    socket.on("task_update", (data: any) => {
-      console.log("Received task_update:", data);
-      const { task_id, type, status, progress, result, error, filename } = data;
+    socket.on(
+      "task_update",
+      (data: {
+        task_id: string;
+        type: string;
+        status: string;
+        progress: number;
+        result: Record<string, unknown>;
+        error: string;
+        filename: string;
+      }) => {
+        console.log("Received task_update:", data);
+        const { task_id, type, status, progress, result, error, filename } =
+          data;
 
-      setJobs((prev) => {
-        const updated = new Map(prev);
-        const job = updated.get(task_id);
+        setJobs((prev) => {
+          const updated = new Map(prev);
+          const job = updated.get(task_id);
 
-        if (!job) {
-          console.warn(`Received update for unknown task: ${task_id}`);
-          return prev;
-        }
+          if (!job) {
+            console.warn(`Received update for unknown task: ${task_id}`);
+            return prev;
+          }
 
-        // Map backend 'type' to frontend 'status'
-        let jobStatus = job.status;
-        if (type === "complete") {
-          jobStatus = "completed";
-        } else if (type === "error") {
-          jobStatus = "failed";
-        } else if (type === "progress" || type === "stage_start") {
-          jobStatus = "processing";
-        }
+          // Map backend 'type' to frontend 'status'
+          let jobStatus = job.status;
+          if (type === "complete") {
+            jobStatus = "completed";
+          } else if (type === "error") {
+            jobStatus = "failed";
+          } else if (type === "progress" || type === "stage_start") {
+            jobStatus = "processing";
+          }
 
-        // For progress updates, ensure progress is a number between 0-100
-        let updatedProgress = job.progress;
-        if (progress !== undefined && progress !== null) {
-          updatedProgress = Math.min(100, Math.max(0, progress));
-        }
+          // For progress updates, ensure progress is a number between 0-100
+          let updatedProgress = job.progress;
+          if (progress !== undefined && progress !== null) {
+            updatedProgress = Math.min(100, Math.max(0, progress));
+          }
 
-        // If completed, set progress to 100
-        if (jobStatus === "completed") {
-          updatedProgress = 100;
-        }
+          // If completed, set progress to 100
+          if (jobStatus === "completed") {
+            updatedProgress = 100;
+          }
 
-        const updatedJob = {
-          ...job,
-          status: jobStatus,
-          progress: updatedProgress,
-          result: result || job.result,
-          error: error || job.error,
-        };
+          const updatedJob = {
+            ...job,
+            status: jobStatus,
+            progress: updatedProgress,
+            result: result || job.result,
+            error: error || job.error,
+          };
 
-        console.log(`Updating job ${task_id}:`, updatedJob);
-        updated.set(task_id, updatedJob);
-        return updated;
-      });
-    });
+          console.log(`Updating job ${task_id}:`, updatedJob);
+          updated.set(task_id, updatedJob);
+          return updated;
+        });
+      }
+    );
 
     socketRef.current = socket;
 
