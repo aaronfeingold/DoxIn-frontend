@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { clientConfig } from "@/config/client";
+import Image from "next/image";
+import type { ApiErrorResponse } from "@/types/api";
 
 interface LineItem {
   line_number: number;
@@ -69,7 +71,7 @@ interface InvoiceReviewModalProps {
   taskId: string | null;
   isOpen: boolean;
   onClose: () => void;
-  onApprove?: () => void;
+  onApprove?: (result?: Record<string, unknown>) => void;
 }
 
 export default function InvoiceReviewModal({
@@ -97,14 +99,15 @@ export default function InvoiceReviewModal({
     try {
       setLoading(true);
       const response = await fetch(
-        `${clientConfig.backendUrl}/api/v1/jobs/my-jobs/${taskId}`,
+        `${clientConfig.baseUrl}/jobs/my-jobs/${taskId}`,
         {
           credentials: "include",
         }
       );
 
       if (!response.ok) {
-        throw new Error("Failed to fetch job details");
+        const error: ApiErrorResponse = await response.json();
+        throw new Error(error.error || "Failed to fetch job details");
       }
 
       const data = await response.json();
@@ -116,9 +119,11 @@ export default function InvoiceReviewModal({
       } else if (data.job?.result_data?.blob_url) {
         setBlobUrl(data.job.result_data.blob_url);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error fetching job details:", error);
-      toast.error("Failed to load invoice data");
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to load invoice data";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -130,7 +135,7 @@ export default function InvoiceReviewModal({
     try {
       setSaving(true);
       const response = await fetch(
-        `${clientConfig.backendUrl}/api/v1/invoices/approve/${taskId}`,
+        `${clientConfig.baseUrl}/invoices/approve/${taskId}`,
         {
           method: "POST",
           credentials: "include",
@@ -138,17 +143,19 @@ export default function InvoiceReviewModal({
       );
 
       if (!response.ok) {
-        const error = await response.json();
+        const error: ApiErrorResponse = await response.json();
         throw new Error(error.error || "Failed to approve invoice");
       }
 
       const result = await response.json();
       toast.success("Invoice approved and saved successfully");
-      onApprove?.();
+      onApprove?.(result);
       onClose();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error approving invoice:", error);
-      toast.error(error.message || "Failed to approve invoice");
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to approve invoice";
+      toast.error(errorMessage);
     } finally {
       setSaving(false);
     }
@@ -436,9 +443,11 @@ export default function InvoiceReviewModal({
                           <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
                         </div>
                       )}
-                      <img
+                      <Image
                         src={blobUrl}
                         alt="Invoice preview"
+                        width={400}
+                        height={400}
                         className="w-full h-full object-contain"
                         onLoad={() => setImageLoading(false)}
                         onError={() => {

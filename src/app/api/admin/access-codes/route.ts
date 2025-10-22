@@ -12,6 +12,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { WhereClause } from "@/types/database";
 
 const prisma = new PrismaClient();
 
@@ -40,7 +41,7 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get("search") || undefined;
 
     // Build where clause
-    const where: any = {};
+    const where: WhereClause = {};
 
     // Status filter
     if (statusFilter && statusFilter !== "all") {

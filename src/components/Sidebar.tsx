@@ -152,9 +152,11 @@ export function Sidebar() {
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-sidebar-primary rounded-full flex items-center justify-center flex-shrink-0">
               {user.image ? (
-                <img
+                <Image
                   src={user.image}
                   alt={user.name || "User"}
+                  width={40}
+                  height={40}
                   className="w-full h-full rounded-full object-cover"
                 />
               ) : (

@@ -12,15 +12,7 @@ export async function POST() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const flaskBaseUrl = serverConfig.flaskApiUrl;
-
-    if (!flaskBaseUrl) {
-      console.error("FLASK_API_URL environment variable is not set");
-      return NextResponse.json(
-        { error: "Backend URL not configured" },
-        { status: 500 }
-      );
-    }
+    const { baseUrl } = serverConfig;
 
     const cookieHeader = headerList.get("cookie");
     const flaskHeaders: Record<string, string> = {};
@@ -39,14 +31,11 @@ export async function POST() {
       flaskHeaders["X-Forwarded-For"] = forwardedFor;
     }
 
-    const flaskResponse = await fetch(
-      `${flaskBaseUrl}/api/v1/auth/track-login`,
-      {
-        method: "POST",
-        headers: flaskHeaders,
-        credentials: "include",
-      }
-    );
+    const flaskResponse = await fetch(`${baseUrl}/auth/track-login`, {
+      method: "POST",
+      headers: flaskHeaders,
+      credentials: "include",
+    });
 
     if (!flaskResponse.ok) {
       const errorPayload = await flaskResponse.json().catch(() => ({}));

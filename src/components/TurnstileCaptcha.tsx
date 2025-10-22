@@ -14,6 +14,7 @@
 
 import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
 import { useRef } from "react";
+import { AlertTriangle } from "lucide-react";
 import { clientConfig } from "@/config/client";
 
 interface TurnstileCaptchaProps {
@@ -38,9 +39,12 @@ export function TurnstileCaptcha({
       "NEXT_PUBLIC_TURNSTILE_SITE_KEY not set. CAPTCHA will not be rendered."
     );
     return (
-      <div className="rounded border border-yellow-500 bg-yellow-50 p-3 text-sm text-yellow-800 dark:bg-yellow-950 dark:text-yellow-200">
-        ⚠️ CAPTCHA not configured. Set NEXT_PUBLIC_TURNSTILE_SITE_KEY
-        environment variable.
+      <div className="flex items-center gap-2 rounded border border-yellow-500 bg-yellow-50 p-3 text-sm text-yellow-800 dark:bg-yellow-950 dark:text-yellow-200">
+        <AlertTriangle className="h-4 w-4 flex-shrink-0" />
+        <span>
+          CAPTCHA not configured. Set NEXT_PUBLIC_TURNSTILE_SITE_KEY environment
+          variable.
+        </span>
       </div>
     );
   }
@@ -85,7 +89,7 @@ export async function verifyTurnstileToken(
     console.error("TURNSTILE_SECRET_KEY not set");
     // In development, we might want to skip verification
     if (serverConfig.isDevelopment) {
-      console.warn("⚠️ Skipping CAPTCHA verification in development mode");
+      console.warn("Skipping CAPTCHA verification in development mode");
       return { success: true };
     }
     return { success: false, error: "CAPTCHA configuration error" };

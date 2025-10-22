@@ -98,7 +98,7 @@ export default function InvoicesPage() {
   const fetchAllUsers = async () => {
     try {
       const response = await fetch(
-        `${clientConfig.backendUrl}/api/v1/admin/users?per_page=1000`,
+        `${clientConfig.baseUrl}/admin/users?per_page=1000`,
         {
           credentials: "include",
         }
@@ -117,7 +117,7 @@ export default function InvoicesPage() {
     try {
       setIsLoading(true);
 
-      const url = new URL(`${clientConfig.backendUrl}/api/v1/invoices/`);
+      const url = new URL(`${clientConfig.baseUrl}/invoices/`);
       url.searchParams.append("page", page.toString());
       url.searchParams.append("per_page", pagination.per_page.toString());
 

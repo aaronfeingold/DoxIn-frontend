@@ -17,12 +17,15 @@ REDIS_URL=redis://localhost:6379
 REDIS_SESSION_DB=2
 
 # Flask API Configuration
-NEXT_PUBLIC_FLASK_API_URL=http://localhost:5000
-FLASK_API_URL=http://localhost:5000
-NEXT_PUBLIC_BACKEND_URL=http://localhost:5000
+NEXT_PUBLIC_API_URL=http://localhost:5000
+API_URL=http://localhost:5000
 
 # Vercel Blob Storage (for invoice uploads)
 BLOB_READ_WRITE_TOKEN=your-vercel-blob-token-here
 
 # Development Settings
 NODE_ENV=development
+
+# Cloudflare Turnstile
+NEXT_PUBLIC_TURNSTILE_SITE_KEY="your-site-key-from-cloudflare"
+TURNSTILE_SECRET_KEY="your-secret-key-from-cloudflare"

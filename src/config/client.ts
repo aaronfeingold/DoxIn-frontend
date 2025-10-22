@@ -14,19 +14,16 @@
  * - API routes
  * - Anywhere in the app
  */
+/**
+ * API URL
+ */
+export const apiUrl =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 /**
- * Flask/Python Backend API URL (client-accessible)
+ * API Version
  */
-export const flaskApiUrl = process.env.NEXT_PUBLIC_FLASK_API_URL;
-
-/**
- * Backend URL for WebSocket connections
- */
-export const backendUrl =
-  process.env.NEXT_PUBLIC_BACKEND_URL ||
-  process.env.NEXT_PUBLIC_FLASK_API_URL ||
-  "http://localhost:5000";
+export const apiVersion = process.env.NEXT_PUBLIC_API_VERSION || "/api/v1";
 
 /**
  * Cloudflare Turnstile Site Key (CAPTCHA)
@@ -38,8 +35,9 @@ export const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
  * Use this for convenient access to all client-side config
  */
 export const clientConfig = {
-  flaskApiUrl,
-  backendUrl,
+  apiUrl,
+  apiVersion,
+  baseUrl: `${apiUrl}${apiVersion}`,
   turnstileSiteKey,
   nodeEnv: process.env.NODE_ENV || "development",
   isDevelopment: process.env.NODE_ENV === "development",
@@ -53,8 +51,8 @@ export const clientConfig = {
 export function validateClientConfig() {
   const errors: string[] = [];
 
-  if (!flaskApiUrl) {
-    errors.push("NEXT_PUBLIC_FLASK_API_URL must be set");
+  if (!apiUrl) {
+    errors.push("NEXT_PUBLIC_API_URL must be set");
   }
 
   if (errors.length > 0) {

@@ -10,9 +10,10 @@ import {
   Image as ImageIcon,
   ZoomIn,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { clientConfig } from "@/config/client";
+import Image from "next/image";
+import type { ApiErrorResponse } from "@/types/api";
 
 interface LineItem {
   id?: string;
@@ -110,14 +111,15 @@ export default function InvoiceEditModal({
     try {
       setLoading(true);
       const response = await fetch(
-        `${clientConfig.backendUrl}/api/v1/invoices/${invoiceId}`,
+        `${clientConfig.baseUrl}/invoices/${invoiceId}`,
         {
           credentials: "include",
         }
       );
 
       if (!response.ok) {
-        throw new Error("Failed to fetch invoice");
+        const error: ApiErrorResponse = await response.json();
+        throw new Error(error.error || "Failed to fetch invoice");
       }
 
       const data = await response.json();
@@ -136,7 +138,9 @@ export default function InvoiceEditModal({
       setInvoice(data);
     } catch (error) {
       console.error("Error fetching invoice:", error);
-      toast.error("Failed to load invoice");
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to load invoice";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -148,7 +152,7 @@ export default function InvoiceEditModal({
     try {
       setSaving(true);
       const response = await fetch(
-        `${clientConfig.backendUrl}/api/v1/invoices/${invoiceId}`,
+        `${clientConfig.baseUrl}/invoices/${invoiceId}`,
         {
           method: "PUT",
           headers: {
@@ -160,27 +164,33 @@ export default function InvoiceEditModal({
       );
 
       if (!response.ok) {
-        const error = await response.json();
+        const error: ApiErrorResponse = await response.json();
         throw new Error(error.error || "Failed to update invoice");
       }
 
       toast.success("Invoice updated successfully");
       onSave?.();
       onClose();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error saving invoice:", error);
-      toast.error(error.message || "Failed to save invoice");
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to save invoice";
+      toast.error(errorMessage);
     } finally {
       setSaving(false);
     }
   };
 
-  const handleFieldChange = (field: string, value: any) => {
+  const handleFieldChange = (field: string, value: string | number) => {
     if (!invoice) return;
     setInvoice({ ...invoice, [field]: value });
   };
 
-  const handleLineItemChange = (index: number, field: string, value: any) => {
+  const handleLineItemChange = (
+    index: number,
+    field: string,
+    value: string | number
+  ) => {
     if (!invoice) return;
     const updatedItems = [...invoice.line_items];
     updatedItems[index] = { ...updatedItems[index], [field]: value };
@@ -513,7 +523,8 @@ export default function InvoiceEditModal({
                       ))}
                       {invoice.line_items.length === 0 && (
                         <p className="text-sm text-muted-foreground text-center py-4">
-                          No line items. Click "Add Item" to add one.
+                          No line items. Click &ldquo;Add Item&rdquo; to add
+                          one.
                         </p>
                       )}
                     </div>
@@ -548,7 +559,7 @@ export default function InvoiceEditModal({
                           className="relative cursor-pointer group border border-border rounded-lg overflow-hidden"
                           onClick={() => setImageExpanded(true)}
                         >
-                          <img
+                          <Image
                             src={invoice.blob_url}
                             alt="Invoice"
                             className="w-full h-auto"
@@ -557,6 +568,8 @@ export default function InvoiceEditModal({
                               setImageLoading(false);
                               toast.error("Failed to load invoice image");
                             }}
+                            width={400}
+                            height={400}
                           />
                           <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                             <ZoomIn className="h-8 w-8 text-white" />
@@ -623,9 +636,11 @@ export default function InvoiceEditModal({
           >
             <X className="h-8 w-8" />
           </button>
-          <img
+          <Image
             src={invoice.blob_url}
             alt="Invoice (expanded)"
+            width={400}
+            height={400}
             className="max-w-full max-h-full object-contain"
           />
         </div>

@@ -5,14 +5,12 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import {
   FileText,
-  Search,
   ChevronLeft,
   ChevronRight,
   Filter,
   X,
   Database,
   User,
-  Calendar,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -21,8 +19,8 @@ interface AuditLog {
   table_name: string;
   record_id: string;
   action: string;
-  old_values: Record<string, any> | null;
-  new_values: Record<string, any> | null;
+  old_values: Record<string, unknown> | null;
+  new_values: Record<string, unknown> | null;
   changed_fields: string[];
   changed_by: string;
   changed_at: string;

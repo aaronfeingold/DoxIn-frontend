@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const flaskUrl = `${serverConfig.flaskApiUrl}/auth/jwt-token`;
+    const flaskUrl = `${serverConfig.baseUrl}/auth/jwt-token`;
     const cookieHeader = req.headers.get("cookie");
     const flaskHeaders: Record<string, string> = {};
 

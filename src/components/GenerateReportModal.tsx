@@ -4,6 +4,7 @@ import { useState } from "react";
 import { X, Download, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { clientConfig } from "@/config/client";
+import type { ApiErrorResponse } from "@/types/api";
 
 interface GenerateReportModalProps {
   isOpen: boolean;
@@ -52,7 +53,7 @@ export default function GenerateReportModal({
   const checkReportStatus = async (reportId: string) => {
     try {
       const response = await fetch(
-        `${clientConfig.backendUrl}/api/v1/reports/${reportId}`,
+        `${clientConfig.baseUrl}/reports/${reportId}`,
         {
           credentials: "include",
         }
@@ -96,7 +97,7 @@ export default function GenerateReportModal({
     setIsGenerating(true);
 
     try {
-      const params: any = {};
+      const params: Record<string, string> = {};
 
       if (startDate) {
         params.start_date = startDate;
@@ -105,23 +106,20 @@ export default function GenerateReportModal({
         params.end_date = endDate;
       }
 
-      const response = await fetch(
-        `${clientConfig.backendUrl}/api/v1/reports/generate`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            report_type: reportType,
-            title,
-            description,
-            parameters: params,
-            file_format: "png",
-          }),
-        }
-      );
+      const response = await fetch(`${clientConfig.baseUrl}/reports/generate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          report_type: reportType,
+          title,
+          description,
+          parameters: params,
+          file_format: "png",
+        }),
+      });
 
       if (response.ok) {
         const data = await response.json();
@@ -139,7 +137,7 @@ export default function GenerateReportModal({
         }, 2000);
         setPollingInterval(interval);
       } else {
-        const error = await response.json();
+        const error: ApiErrorResponse = await response.json();
         toast.error(error.error || "Failed to generate report");
         setIsGenerating(false);
       }
@@ -155,7 +153,7 @@ export default function GenerateReportModal({
 
     try {
       const response = await fetch(
-        `${clientConfig.backendUrl}/api/v1/reports/${reportJob.report_id}/download`,
+        `${clientConfig.baseUrl}/reports/${reportJob.report_id}/download`,
         {
           credentials: "include",
         }
