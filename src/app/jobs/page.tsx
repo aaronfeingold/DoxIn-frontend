@@ -139,7 +139,7 @@ export default function JobsPage() {
     try {
       setIsLoading(true);
 
-      const url = new URL(`${clientConfig.backendUrl}/api/v1/jobs/my-jobs`);
+      const url = new URL(`${clientConfig.apiUrl}/api/v1/jobs/my-jobs`);
       if (statusFilter !== "all") {
         url.searchParams.append("status", statusFilter);
       }
@@ -187,7 +187,7 @@ export default function JobsPage() {
     if (job.status === "completed" || job.status === "failed") {
       try {
         const response = await fetch(
-          `${clientConfig.backendUrl}/api/v1/jobs/my-jobs/${job.id}`,
+          `${clientConfig.apiUrl}/api/v1/jobs/my-jobs/${job.id}`,
           {
             credentials: "include",
           }

@@ -402,8 +402,8 @@ export default function Page() {
               className="border border-border rounded-xl p-8"
             >
               <p className="text-lg leading-relaxed mb-6">
-                "We cut manual entry by 90%. The validation rules caught issues
-                before they hit our ERP."
+                &ldquo;We cut manual entry by 90%. The validation rules caught
+                issues before they hit our ERP.&rdquo;
               </p>
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-full bg-foreground" />
@@ -423,8 +423,8 @@ export default function Page() {
               className="border border-border rounded-xl p-8"
             >
               <p className="text-lg leading-relaxed mb-6">
-                "Setup was painless. We processed thousands of invoices in our
-                first week."
+                &ldquo;Setup was painless. We processed thousands of invoices in
+                our first week.&rdquo;
               </p>
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-full bg-foreground" />
@@ -444,8 +444,8 @@ export default function Page() {
               className="border border-border rounded-xl p-8"
             >
               <p className="text-lg leading-relaxed mb-6">
-                "The accuracy is outstanding. Our audit trail improved without
-                extra work."
+                &ldquo;The accuracy is outstanding. Our audit trail improved
+                without extra work.&rdquo;
               </p>
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-full bg-foreground" />

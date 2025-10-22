@@ -97,7 +97,7 @@ export default function InvoiceReviewModal({
     try {
       setLoading(true);
       const response = await fetch(
-        `${clientConfig.backendUrl}/api/v1/jobs/my-jobs/${taskId}`,
+        `${clientConfig.apiUrl}/api/v1/jobs/my-jobs/${taskId}`,
         {
           credentials: "include",
         }
@@ -130,7 +130,7 @@ export default function InvoiceReviewModal({
     try {
       setSaving(true);
       const response = await fetch(
-        `${clientConfig.backendUrl}/api/v1/invoices/approve/${taskId}`,
+        `${clientConfig.apiUrl}/api/v1/invoices/approve/${taskId}`,
         {
           method: "POST",
           credentials: "include",

@@ -39,7 +39,7 @@ export function NotificationProvider({
   const refreshUnreadCount = useCallback(async () => {
     try {
       const response = await fetch(
-        `${clientConfig.backendUrl}/api/v1/jobs/my-jobs/unread-count`,
+        `${clientConfig.apiUrl}/api/v1/jobs/my-jobs/unread-count`,
         {
           credentials: "include",
         }
@@ -60,7 +60,7 @@ export function NotificationProvider({
   const markAllAsRead = useCallback(async () => {
     try {
       const response = await fetch(
-        `${clientConfig.backendUrl}/api/v1/jobs/my-jobs/mark-as-read`,
+        `${clientConfig.apiUrl}/api/v1/jobs/my-jobs/mark-as-read`,
         {
           method: "POST",
           credentials: "include",
@@ -99,7 +99,7 @@ export function NotificationProvider({
     async (jobId: string) => {
       try {
         const response = await fetch(
-          `${clientConfig.backendUrl}/api/v1/jobs/my-jobs/mark-as-read`,
+          `${clientConfig.apiUrl}/api/v1/jobs/my-jobs/mark-as-read`,
           {
             method: "POST",
             credentials: "include",
@@ -131,7 +131,7 @@ export function NotificationProvider({
   useEffect(() => {
     if (!user?.id) return;
 
-    const socket = io(clientConfig.backendUrl, {
+    const socket = io(clientConfig.apiUrl, {
       transports: ["polling", "websocket"],
       reconnection: true,
     });

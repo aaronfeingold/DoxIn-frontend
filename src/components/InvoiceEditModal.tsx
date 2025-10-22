@@ -110,7 +110,7 @@ export default function InvoiceEditModal({
     try {
       setLoading(true);
       const response = await fetch(
-        `${clientConfig.backendUrl}/api/v1/invoices/${invoiceId}`,
+        `${clientConfig.apiUrl}/api/v1/invoices/${invoiceId}`,
         {
           credentials: "include",
         }
@@ -148,7 +148,7 @@ export default function InvoiceEditModal({
     try {
       setSaving(true);
       const response = await fetch(
-        `${clientConfig.backendUrl}/api/v1/invoices/${invoiceId}`,
+        `${clientConfig.apiUrl}/api/v1/invoices/${invoiceId}`,
         {
           method: "PUT",
           headers: {

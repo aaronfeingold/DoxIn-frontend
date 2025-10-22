@@ -55,7 +55,7 @@ export function ProcessingProvider({
 
   // Initialize websocket connection
   useEffect(() => {
-    const socket = io(clientConfig.backendUrl, {
+    const socket = io(clientConfig.apiUrl, {
       transports: ["polling", "websocket"], // Try polling first, then upgrade
       reconnection: true,
       reconnectionAttempts: 5,
@@ -208,7 +208,7 @@ export function ProcessingProvider({
 
         // Send batch processing request to backend
         const response = await fetch(
-          `${clientConfig.backendUrl}/api/v1/invoices/process-batch`,
+          `${clientConfig.apiUrl}/api/v1/invoices/process-batch`,
           {
             method: "POST",
             headers: {
@@ -268,7 +268,7 @@ export function ProcessingProvider({
   const cancelJob = useCallback(async (taskId: string) => {
     try {
       const response = await fetch(
-        `${clientConfig.backendUrl}/api/jobs/${taskId}/cancel`,
+        `${clientConfig.apiUrl}/api/jobs/${taskId}/cancel`,
         {
           method: "POST",
         }

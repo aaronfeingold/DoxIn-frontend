@@ -81,15 +81,15 @@ export default function AdminAnalyticsPage() {
 
         const [dashboardRes, customersRes, productsRes] = await Promise.all([
           fetch(
-            `${clientConfig.backendUrl}/api/v1/reports/analytics/executive-dashboard`,
+            `${clientConfig.apiUrl}/api/v1/reports/analytics/executive-dashboard`,
             { credentials: "include" }
           ),
           fetch(
-            `${clientConfig.backendUrl}/api/v1/reports/analytics/customer-analytics?limit=10`,
+            `${clientConfig.apiUrl}/api/v1/reports/analytics/customer-analytics?limit=10`,
             { credentials: "include" }
           ),
           fetch(
-            `${clientConfig.backendUrl}/api/v1/reports/analytics/product-performance?limit=10`,
+            `${clientConfig.apiUrl}/api/v1/reports/analytics/product-performance?limit=10`,
             { credentials: "include" }
           ),
         ]);

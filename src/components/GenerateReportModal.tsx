@@ -52,7 +52,7 @@ export default function GenerateReportModal({
   const checkReportStatus = async (reportId: string) => {
     try {
       const response = await fetch(
-        `${clientConfig.backendUrl}/api/v1/reports/${reportId}`,
+        `${clientConfig.apiUrl}/api/v1/reports/${reportId}`,
         {
           credentials: "include",
         }
@@ -106,7 +106,7 @@ export default function GenerateReportModal({
       }
 
       const response = await fetch(
-        `${clientConfig.backendUrl}/api/v1/reports/generate`,
+        `${clientConfig.apiUrl}/api/v1/reports/generate`,
         {
           method: "POST",
           headers: {
@@ -155,7 +155,7 @@ export default function GenerateReportModal({
 
     try {
       const response = await fetch(
-        `${clientConfig.backendUrl}/api/v1/reports/${reportJob.report_id}/download`,
+        `${clientConfig.apiUrl}/api/v1/reports/${reportJob.report_id}/download`,
         {
           credentials: "include",
         }

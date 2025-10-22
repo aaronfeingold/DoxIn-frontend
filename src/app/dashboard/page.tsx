@@ -22,7 +22,7 @@ export default function DashboardPage() {
     const fetchStats = async () => {
       try {
         const response = await fetch(
-          `${clientConfig.backendUrl}/api/v1/dashboard/stats`,
+          `${clientConfig.apiUrl}/api/v1/dashboard/stats`,
           {
             credentials: "include",
           }
