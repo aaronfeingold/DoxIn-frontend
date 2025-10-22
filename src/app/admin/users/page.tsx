@@ -14,6 +14,7 @@ import {
 import { toast } from "sonner";
 import GenerateAccessCodeModal from "@/components/GenerateAccessCodeModal";
 import SendInvitationModal from "@/components/SendInvitationModal";
+import Image from "next/image";
 
 interface User {
   id: string;
@@ -211,7 +212,7 @@ export default function AdminUsersPage() {
                           <div className="flex items-center">
                             <div className="h-10 w-10 flex-shrink-0">
                               {u.image ? (
-                                <img
+                                <Image
                                   src={u.image}
                                   alt={u.name || u.email}
                                   className="h-10 w-10 rounded-full object-cover"
