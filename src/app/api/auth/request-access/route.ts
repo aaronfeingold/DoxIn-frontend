@@ -59,7 +59,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const captchaResult = await verifyTurnstileToken(captchaToken);
+    // Get user's IP address for additional CAPTCHA validation
+    const remoteIp =
+      request.headers.get("x-forwarded-for")?.split(",")[0] ||
+      request.headers.get("x-real-ip") ||
+      undefined;
+
+    const captchaResult = await verifyTurnstileToken(captchaToken, remoteIp);
     if (!captchaResult.success) {
       return NextResponse.json(
         { error: captchaResult.error || "CAPTCHA verification failed" },
