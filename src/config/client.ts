@@ -21,6 +21,11 @@ export const apiUrl =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 /**
+ * API Version
+ */
+export const apiVersion = process.env.NEXT_PUBLIC_API_VERSION || "/api/v1";
+
+/**
  * Cloudflare Turnstile Site Key (CAPTCHA)
  */
 export const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
@@ -31,6 +36,8 @@ export const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
  */
 export const clientConfig = {
   apiUrl,
+  apiVersion,
+  baseUrl: `${apiUrl}${apiVersion}`,
   turnstileSiteKey,
   nodeEnv: process.env.NODE_ENV || "development",
   isDevelopment: process.env.NODE_ENV === "development",

@@ -71,7 +71,7 @@ export default function AnalyticsPage() {
 
         // Use the comprehensive summary endpoint
         const response = await fetch(
-          `${clientConfig.apiUrl}/api/v1/reports/analytics/summary`,
+          `${clientConfig.baseUrl}/reports/analytics/summary`,
           { credentials: "include" }
         );
 

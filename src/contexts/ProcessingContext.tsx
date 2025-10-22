@@ -208,7 +208,7 @@ export function ProcessingProvider({
 
         // Send batch processing request to backend
         const response = await fetch(
-          `${clientConfig.apiUrl}/api/v1/invoices/process-batch`,
+          `${clientConfig.baseUrl}/invoices/process-batch`,
           {
             method: "POST",
             headers: {

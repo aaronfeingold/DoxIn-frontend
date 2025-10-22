@@ -52,7 +52,7 @@ export default function GenerateReportModal({
   const checkReportStatus = async (reportId: string) => {
     try {
       const response = await fetch(
-        `${clientConfig.apiUrl}/api/v1/reports/${reportId}`,
+        `${clientConfig.baseUrl}/reports/${reportId}`,
         {
           credentials: "include",
         }
@@ -105,23 +105,20 @@ export default function GenerateReportModal({
         params.end_date = endDate;
       }
 
-      const response = await fetch(
-        `${clientConfig.apiUrl}/api/v1/reports/generate`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            report_type: reportType,
-            title,
-            description,
-            parameters: params,
-            file_format: "png",
-          }),
-        }
-      );
+      const response = await fetch(`${clientConfig.baseUrl}/reports/generate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          report_type: reportType,
+          title,
+          description,
+          parameters: params,
+          file_format: "png",
+        }),
+      });
 
       if (response.ok) {
         const data = await response.json();
@@ -155,7 +152,7 @@ export default function GenerateReportModal({
 
     try {
       const response = await fetch(
-        `${clientConfig.apiUrl}/api/v1/reports/${reportJob.report_id}/download`,
+        `${clientConfig.baseUrl}/reports/${reportJob.report_id}/download`,
         {
           credentials: "include",
         }

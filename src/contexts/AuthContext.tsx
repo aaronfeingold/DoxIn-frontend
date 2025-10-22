@@ -91,7 +91,7 @@ export function AuthContextProvider({
           throw new Error("API URL not configured");
         }
 
-        const sessionInfoUrl = `${apiUrl}/api/v1/auth/session-info`;
+        const sessionInfoUrl = `${apiUrl}${clientConfig.apiVersion}/auth/session-info`;
 
         const sessionResponse = await fetch(sessionInfoUrl, {
           headers: {

@@ -110,14 +110,15 @@ export default function InvoiceEditModal({
     try {
       setLoading(true);
       const response = await fetch(
-        `${clientConfig.apiUrl}/api/v1/invoices/${invoiceId}`,
+        `${clientConfig.baseUrl}/invoices/${invoiceId}`,
         {
           credentials: "include",
         }
       );
 
       if (!response.ok) {
-        throw new Error("Failed to fetch invoice");
+        const error = await response.json();
+        throw new Error(error.error || "Failed to fetch invoice");
       }
 
       const data = await response.json();
@@ -148,7 +149,7 @@ export default function InvoiceEditModal({
     try {
       setSaving(true);
       const response = await fetch(
-        `${clientConfig.apiUrl}/api/v1/invoices/${invoiceId}`,
+        `${clientConfig.baseUrl}/invoices/${invoiceId}`,
         {
           method: "PUT",
           headers: {

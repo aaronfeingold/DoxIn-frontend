@@ -98,14 +98,15 @@ export default function InvoiceReviewModal({
     try {
       setLoading(true);
       const response = await fetch(
-        `${clientConfig.apiUrl}/api/v1/jobs/my-jobs/${taskId}`,
+        `${clientConfig.baseUrl}/jobs/my-jobs/${taskId}`,
         {
           credentials: "include",
         }
       );
 
       if (!response.ok) {
-        throw new Error("Failed to fetch job details");
+        const error = await response.json();
+        throw new Error(error.error || "Failed to fetch job details");
       }
 
       const data = await response.json();
@@ -131,7 +132,7 @@ export default function InvoiceReviewModal({
     try {
       setSaving(true);
       const response = await fetch(
-        `${clientConfig.apiUrl}/api/v1/invoices/approve/${taskId}`,
+        `${clientConfig.baseUrl}/invoices/approve/${taskId}`,
         {
           method: "POST",
           credentials: "include",

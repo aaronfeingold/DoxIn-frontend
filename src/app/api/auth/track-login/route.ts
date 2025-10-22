@@ -40,7 +40,7 @@ export async function POST() {
     }
 
     const flaskResponse = await fetch(
-      `${flaskBaseUrl}/api/v1/auth/track-login`,
+      `${flaskBaseUrl}${clientConfig.apiVersion}/auth/track-login`,
       {
         method: "POST",
         headers: flaskHeaders,
