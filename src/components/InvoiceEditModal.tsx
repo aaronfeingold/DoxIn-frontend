@@ -167,20 +167,26 @@ export default function InvoiceEditModal({
       toast.success("Invoice updated successfully");
       onSave?.();
       onClose();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error saving invoice:", error);
-      toast.error(error.message || "Failed to save invoice");
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to save invoice";
+      toast.error(errorMessage);
     } finally {
       setSaving(false);
     }
   };
 
-  const handleFieldChange = (field: string, value: any) => {
+  const handleFieldChange = (field: string, value: string | number) => {
     if (!invoice) return;
     setInvoice({ ...invoice, [field]: value });
   };
 
-  const handleLineItemChange = (index: number, field: string, value: any) => {
+  const handleLineItemChange = (
+    index: number,
+    field: string,
+    value: string | number
+  ) => {
     if (!invoice) return;
     const updatedItems = [...invoice.line_items];
     updatedItems[index] = { ...updatedItems[index], [field]: value };
@@ -513,7 +519,8 @@ export default function InvoiceEditModal({
                       ))}
                       {invoice.line_items.length === 0 && (
                         <p className="text-sm text-muted-foreground text-center py-4">
-                          No line items. Click "Add Item" to add one.
+                          No line items. Click &ldquo;Add Item&rdquo; to add
+                          one.
                         </p>
                       )}
                     </div>
