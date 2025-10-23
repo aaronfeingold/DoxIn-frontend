@@ -14,7 +14,11 @@
 "use client";
 
 import { createAuthClient } from "better-auth/react";
+import { clientConfig } from "@/config/client";
 
-export const authClient = createAuthClient();
+export const authClient = createAuthClient({
+  baseURL: typeof window !== "undefined" ? window.location.origin : "",
+  basePath: `${clientConfig.nextApiVer}/auth`,
+});
 
 export const { useSession, signIn, signOut } = authClient;

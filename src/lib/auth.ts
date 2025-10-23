@@ -22,6 +22,7 @@ import { getSessionRedisClient } from "./redis";
 import { serverConfig } from "@/config/server";
 import { getMagicLinkEmailHtml } from "./magic-link";
 import { prisma } from "./prisma";
+import { clientConfig } from "@/config/client";
 
 const resend = new Resend(serverConfig.resendApiKey);
 
@@ -29,6 +30,7 @@ const resend = new Resend(serverConfig.resendApiKey);
 const sessionRedis = getSessionRedisClient();
 
 export const auth = betterAuth({
+  basePath: `${clientConfig.nextApiVer}/auth`,
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
@@ -42,7 +44,7 @@ export const auth = betterAuth({
     autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url, token }) => {
       // This is used for magic link authentication
-      const magicLinkUrl = `${serverConfig.betterAuthUrl}/api/auth/verify-email?token=${token}&callbackURL=/dashboard`;
+      const magicLinkUrl = `${serverConfig.betterAuthUrl}${clientConfig.nextApiVer}/auth/verify-email?token=${token}&callbackURL=/dashboard`;
 
       await resend.emails.send({
         from: "Invoice Platform <noreply@doxin.xyz>", // Update with your domain
