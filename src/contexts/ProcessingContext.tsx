@@ -55,6 +55,8 @@ export function ProcessingProvider({
 
   // Initialize websocket connection
   useEffect(() => {
+    console.log("Attempting Socket.IO connection to:", clientConfig.baseUrl);
+
     const socket = io(clientConfig.apiUrl, {
       transports: ["polling", "websocket"], // Try polling first, then upgrade
       reconnection: true,
@@ -65,20 +67,22 @@ export function ProcessingProvider({
       rememberUpgrade: true,
       path: "/socket.io",
       forceNew: true,
+      withCredentials: true, // Important for CORS
     });
 
     // Set connection timeout
     connectionTimeoutRef.current = setTimeout(() => {
       if (!socket.connected) {
+        console.error("Socket.IO connection timeout");
         toast.error(
-          "Backend connection failed. Please ensure the API server is running.",
+          "Backend connection failed. Please ensure the API server is running and accessible.",
           { duration: 5000 }
         );
       }
     }, 5000);
 
     socket.on("connect", () => {
-      console.log("WebSocket connected");
+      console.log("WebSocket connected to:", clientConfig.apiUrl);
       setIsConnected(true);
       if (connectionTimeoutRef.current) {
         clearTimeout(connectionTimeoutRef.current);
@@ -94,7 +98,13 @@ export function ProcessingProvider({
 
     socket.on("connect_error", (error) => {
       console.error("WebSocket connection error:", error);
+      console.error("Attempted URL:", clientConfig.apiUrl);
       setIsConnected(false);
+
+      // Clear the connection timeout since we got an error
+      if (connectionTimeoutRef.current) {
+        clearTimeout(connectionTimeoutRef.current);
+      }
     });
 
     // Listen for joined_task confirmation
@@ -115,8 +125,7 @@ export function ProcessingProvider({
         filename: string;
       }) => {
         console.log("Received task_update:", data);
-        const { task_id, type, status, progress, result, error, filename } =
-          data;
+        const { task_id, type, progress, result, error } = data;
 
         setJobs((prev) => {
           const updated = new Map(prev);
@@ -226,7 +235,7 @@ export function ProcessingProvider({
             headers: {
               "Content-Type": "application/json",
             },
-            credentials: "include", // Include cookies for auth
+            credentials: "include",
             body: JSON.stringify({
               files: uploadedFiles,
               options,
@@ -280,9 +289,10 @@ export function ProcessingProvider({
   const cancelJob = useCallback(async (taskId: string) => {
     try {
       const response = await fetch(
-        `${clientConfig.apiUrl}/api/jobs/${taskId}/cancel`,
+        `${clientConfig.baseUrl}/jobs/${taskId}/cancel`,
         {
           method: "POST",
+          credentials: "include",
         }
       );
 
