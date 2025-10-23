@@ -47,7 +47,7 @@ export const turnstileSecretKey = process.env.TURNSTILE_SECRET_KEY;
 /**
  * Redis Configuration
  */
-export const redisUrl = process.env.REDIS_URL;
+export const redisUrl = process.env.REDIS_URL || "redis://localhost:6379/0";
 
 /**
  * Database URL
